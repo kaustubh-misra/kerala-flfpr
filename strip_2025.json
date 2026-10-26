@@ -1,0 +1,152 @@
+{
+ "year": "2025",
+ "measure": "Female LFPR, 15+, rural + urban, usual status (ps+ss), calendar year",
+ "all_india": "40",
+ "states": [
+  {
+   "state": "Delhi",
+   "value": "13.1"
+  },
+  {
+   "state": "Lakshadweep",
+   "value": "21.9"
+  },
+  {
+   "state": "Haryana",
+   "value": "23.8"
+  },
+  {
+   "state": "Bihar",
+   "value": "24.7"
+  },
+  {
+   "state": "Goa",
+   "value": "27.4"
+  },
+  {
+   "state": "Punjab",
+   "value": "30.2"
+  },
+  {
+   "state": "Uttar Pradesh",
+   "value": "32.4"
+  },
+  {
+   "state": "Puducherry",
+   "value": "32.7"
+  },
+  {
+   "state": "Chandigarh",
+   "value": "35.6"
+  },
+  {
+   "state": "West Bengal",
+   "value": "37.5"
+  },
+  {
+   "state": "Uttarakhand",
+   "value": "37.8"
+  },
+  {
+   "state": "Mizoram",
+   "value": "38"
+  },
+  {
+   "state": "Dadra & Nagar Haveli & Daman & Diu",
+   "value": "38.3"
+  },
+  {
+   "state": "Karnataka",
+   "value": "39.8"
+  },
+  {
+   "state": "Maharashtra",
+   "value": "39.9"
+  },
+  {
+   "state": "Kerala",
+   "value": "41.2"
+  },
+  {
+   "state": "Assam",
+   "value": "42.8"
+  },
+  {
+   "state": "Jharkhand",
+   "value": "43.7"
+  },
+  {
+   "state": "Andhra Pradesh",
+   "value": "44.8"
+  },
+  {
+   "state": "Madhya Pradesh",
+   "value": "46.1"
+  },
+  {
+   "state": "Gujarat",
+   "value": "46.2"
+  },
+  {
+   "state": "Tripura",
+   "value": "46.3"
+  },
+  {
+   "state": "Telangana",
+   "value": "46.4"
+  },
+  {
+   "state": "Odisha",
+   "value": "47.3"
+  },
+  {
+   "state": "Tamil Nadu",
+   "value": "47.3"
+  },
+  {
+   "state": "Andaman & Nicobar Islands",
+   "value": "50.3"
+  },
+  {
+   "state": "Rajasthan",
+   "value": "52.3"
+  },
+  {
+   "state": "Manipur",
+   "value": "52.6"
+  },
+  {
+   "state": "Jammu & Kashmir",
+   "value": "53.1"
+  },
+  {
+   "state": "Chhattisgarh",
+   "value": "59.8"
+  },
+  {
+   "state": "Ladakh",
+   "value": "61"
+  },
+  {
+   "state": "Arunachal Pradesh",
+   "value": "61.7"
+  },
+  {
+   "state": "Meghalaya",
+   "value": "64.3"
+  },
+  {
+   "state": "Nagaland",
+   "value": "64.5"
+  },
+  {
+   "state": "Himachal Pradesh",
+   "value": "64.7"
+  },
+  {
+   "state": "Sikkim",
+   "value": "66.7"
+  }
+ ],
+ "missing": []
+}

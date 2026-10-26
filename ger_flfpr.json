@@ -1,0 +1,248 @@
+{
+ "year": "2021-22",
+ "ger_source": "Ministry of Education, All India Survey on Higher Education (AISHE) 2021-22: female GER, age 18-23",
+ "flfpr_source": "MoSPI eSankhyiki PLFS, July 2021 - June 2022: female LFPR, 15+, usual status (ps+ss), rural + urban",
+ "india": {
+  "state": "All India",
+  "ger": 28.5,
+  "flfpr": 32.8
+ },
+ "correlation": {
+  "n": 36,
+  "pearson_r": -0.047,
+  "pearson_p": 0.784,
+  "spearman_rho": -0.076,
+  "spearman_p": 0.659,
+  "slope": -0.041,
+  "intercept": 36.687,
+  "r_squared": 0.0022
+ },
+ "correlation_excl_lakshadweep": {
+  "n": 35,
+  "pearson_r": -0.148,
+  "pearson_p": 0.395,
+  "spearman_rho": -0.156,
+  "spearman_p": 0.37,
+  "slope": -0.1334,
+  "intercept": 40.279,
+  "r_squared": 0.022
+ },
+ "states": [
+  {
+   "state": "Andaman & Nicobar Islands",
+   "ger": 24.0,
+   "flfpr": 45.7,
+   "tier": "Low"
+  },
+  {
+   "state": "Andhra Pradesh",
+   "ger": 36.3,
+   "flfpr": 43.3,
+   "tier": "High"
+  },
+  {
+   "state": "Arunachal Pradesh",
+   "ger": 38.4,
+   "flfpr": 31.2,
+   "tier": "Mid"
+  },
+  {
+   "state": "Assam",
+   "ger": 16.8,
+   "flfpr": 28.2,
+   "tier": "Mid"
+  },
+  {
+   "state": "Bihar",
+   "ger": 15.9,
+   "flfpr": 10.2,
+   "tier": "Mid"
+  },
+  {
+   "state": "Chandigarh",
+   "ger": 74.8,
+   "flfpr": 16.8,
+   "tier": "Low"
+  },
+  {
+   "state": "Chhattisgarh",
+   "ger": 20.9,
+   "flfpr": 51.6,
+   "tier": "Mid"
+  },
+  {
+   "state": "Dadra & Nagar Haveli & Daman & Diu",
+   "ger": 10.5,
+   "flfpr": 43.0,
+   "tier": null
+  },
+  {
+   "state": "Delhi",
+   "ger": 49.5,
+   "flfpr": 12.2,
+   "tier": "Low"
+  },
+  {
+   "state": "Goa",
+   "ger": 40.9,
+   "flfpr": 20.7,
+   "tier": "Low"
+  },
+  {
+   "state": "Gujarat",
+   "ger": 22.6,
+   "flfpr": 34.4,
+   "tier": "Mid"
+  },
+  {
+   "state": "Haryana",
+   "ger": 36.1,
+   "flfpr": 19.1,
+   "tier": "Mid"
+  },
+  {
+   "state": "Himachal Pradesh",
+   "ger": 49.9,
+   "flfpr": 66.1,
+   "tier": "Low"
+  },
+  {
+   "state": "Jammu & Kashmir",
+   "ger": 26.1,
+   "flfpr": 44.9,
+   "tier": "Mid"
+  },
+  {
+   "state": "Jharkhand",
+   "ger": 18.8,
+   "flfpr": 45.2,
+   "tier": "Mid"
+  },
+  {
+   "state": "Karnataka",
+   "ger": 37.5,
+   "flfpr": 31.8,
+   "tier": "Low"
+  },
+  {
+   "state": "Kerala",
+   "ger": 47.0,
+   "flfpr": 37.0,
+   "tier": "Low"
+  },
+  {
+   "state": "Ladakh",
+   "ger": 13.4,
+   "flfpr": 46.5,
+   "tier": "Mid"
+  },
+  {
+   "state": "Lakshadweep",
+   "ger": 1.2,
+   "flfpr": 16.8,
+   "tier": null
+  },
+  {
+   "state": "Madhya Pradesh",
+   "ger": 28.0,
+   "flfpr": 41.0,
+   "tier": "High"
+  },
+  {
+   "state": "Maharashtra",
+   "ger": 34.8,
+   "flfpr": 38.4,
+   "tier": "Low"
+  },
+  {
+   "state": "Manipur",
+   "ger": 35.7,
+   "flfpr": 23.4,
+   "tier": "Mid"
+  },
+  {
+   "state": "Meghalaya",
+   "ger": 26.4,
+   "flfpr": 50.2,
+   "tier": "Mid"
+  },
+  {
+   "state": "Mizoram",
+   "ger": 33.1,
+   "flfpr": 34.7,
+   "tier": "Mid"
+  },
+  {
+   "state": "Nagaland",
+   "ger": 18.7,
+   "flfpr": 51.5,
+   "tier": "High"
+  },
+  {
+   "state": "Odisha",
+   "ger": 21.8,
+   "flfpr": 32.9,
+   "tier": "Mid"
+  },
+  {
+   "state": "Puducherry",
+   "ger": 63.3,
+   "flfpr": 35.7,
+   "tier": "Low"
+  },
+  {
+   "state": "Punjab",
+   "ger": 30.8,
+   "flfpr": 24.0,
+   "tier": "Mid"
+  },
+  {
+   "state": "Rajasthan",
+   "ger": 27.7,
+   "flfpr": 40.0,
+   "tier": "High"
+  },
+  {
+   "state": "Sikkim",
+   "ger": 42.3,
+   "flfpr": 57.8,
+   "tier": "Low"
+  },
+  {
+   "state": "Tamil Nadu",
+   "ger": 46.9,
+   "flfpr": 40.7,
+   "tier": "Low"
+  },
+  {
+   "state": "Telangana",
+   "ger": 40.5,
+   "flfpr": 44.7,
+   "tier": "Low"
+  },
+  {
+   "state": "Tripura",
+   "ger": 19.8,
+   "flfpr": 26.7,
+   "tier": "High"
+  },
+  {
+   "state": "Uttar Pradesh",
+   "ger": 25.2,
+   "flfpr": 26.3,
+   "tier": "High"
+  },
+  {
+   "state": "Uttarakhand",
+   "ger": 44.5,
+   "flfpr": 33.1,
+   "tier": "Low"
+  },
+  {
+   "state": "West Bengal",
+   "ger": 26.5,
+   "flfpr": 27.9,
+   "tier": "Mid"
+  }
+ ]
+}

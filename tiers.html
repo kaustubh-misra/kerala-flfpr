@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FLFPR by Agrarian Tier</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f9f9f7;
+    --surface-1: #fcfcfb;
+    --surface-2: #f0efec;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --grid: #e1e0d9;
+    --axis: #c3c2b7;
+    --border: rgba(11,11,11,0.10);
+    --border-strong: rgba(11,11,11,0.28);
+    --tier-high: #2a78d6;
+    --tier-mid: #eb6834;
+    --tier-low: #1baf7a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page: #0d0d0d;
+      --surface-1: #1a1a19;
+      --surface-2: #2c2c2a;
+      --text-primary: #f0efec;
+      --text-secondary: #c3c2b7;
+      --grid: #2c2c2a;
+      --axis: #383835;
+      --border: rgba(255,255,255,0.10);
+      --border-strong: rgba(255,255,255,0.30);
+      --tier-high: #3987e5;
+      --tier-mid: #d95926;
+      --tier-low: #199e70;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface-1: #1a1a19;
+    --surface-2: #2c2c2a;
+    --text-primary: #f0efec;
+    --text-secondary: #c3c2b7;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255,255,255,0.10);
+    --border-strong: rgba(255,255,255,0.30);
+    --tier-high: #3987e5;
+    --tier-mid: #d95926;
+    --tier-low: #199e70;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { max-width: 960px; margin: 0 auto; padding: 32px 16px 48px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+  .sub { color: var(--text-secondary); margin: 0 0 20px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 12px 28px; margin: 0 0 12px; }
+  .group { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+  .group-label { color: var(--text-secondary); font-size: 13px; margin-right: 4px; }
+  .chip {
+    font: inherit; font-size: 13px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 5px 11px; border-radius: 999px;
+    background: transparent; color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+  .chip:hover { background: var(--surface-2); }
+  .chip[aria-pressed="true"] { background: var(--surface-2); color: var(--text-primary); border-color: var(--border-strong); }
+  .chip[aria-pressed="false"] .sw { opacity: 0.3; }
+  .chip:focus-visible { outline: 2px solid var(--tier-high); outline-offset: 2px; }
+  .sw-tier { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .sw-line { display: block; }
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 16px 12px;
+    position: relative;
+  }
+  .chartwrap { overflow-x: auto; }
+  svg.chart { display: block; width: 100%; min-width: 640px; height: auto; overflow: visible; }
+  svg.chart:focus { outline: none; }
+  svg.chart:focus-visible { outline: 2px solid var(--tier-high); outline-offset: 4px; border-radius: 4px; }
+  .tick { fill: var(--text-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .era { fill: var(--text-secondary); font-size: 12px; }
+  .endlabel { fill: var(--text-primary); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .tooltip {
+    position: absolute; pointer-events: none; opacity: 0;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px; font-size: 13px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12); min-width: 190px;
+    transition: opacity .1s;
+  }
+  .tooltip .hd { color: var(--text-secondary); margin-bottom: 4px; }
+  .tooltip .row { display: flex; align-items: center; gap: 8px; }
+  .tooltip .row b { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 34px; }
+  .tooltip .row .n { color: var(--text-muted); margin-left: auto; padding-left: 10px; font-variant-numeric: tabular-nums; }
+  .tooltip .row span { color: var(--text-secondary); }
+  details { margin-top: 16px; }
+  summary { cursor: pointer; color: var(--text-secondary); }
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; margin-top: 12px; width: 100%; font-variant-numeric: tabular-nums; font-size: 14px; }
+  th, td { text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--text-secondary); font-weight: 500; }
+  .classify .lede { color: var(--text-secondary); font-size: 14px; margin: 12px 0 4px; }
+  .classify table { margin-top: 8px; }
+  .classify tr.tier-start td { border-top: 1px solid var(--axis); }
+  .classify td.tiercell { text-align: left; }
+  .classify tr.flash td { background: color-mix(in srgb, var(--tier-low) 22%, transparent); transition: background 1.2s; }
+  .classify td.tiercell i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 7px; vertical-align: -1px; }
+  .classify th:nth-child(2), .classify td:nth-child(2), .classify th:nth-child(3) { text-align: left; }
+  .source { color: var(--text-secondary); font-size: 13px; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--grid); }
+  .source p { margin: 4px 0; }
+  .source b { color: var(--text-primary); font-weight: 600; }
+  .source a { color: inherit; }
+  .notes { color: var(--text-secondary); font-size: 13px; margin-top: 20px; }
+  .notes p { margin: 4px 0; }
+  .notes a, .nav a { color: inherit; }
+  .nav { display: flex; gap: 16px; font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
+  .nav .next { margin-left: auto; }
+  .hero { padding: 12px 0 28px; margin-bottom: 28px; border-bottom: 1px solid var(--grid); }
+  .hero h1 { font-size: clamp(26px, 4.5vw, 36px); line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 16px; max-width: 28ch; text-wrap: balance; }
+  .blurb { max-width: 68ch; color: var(--text-secondary); font-size: 16px; line-height: 1.6; }
+  .blurb p { margin: 0 0 10px; }
+  .blurb .lead { color: var(--text-primary); font-size: 18px; font-weight: 500; line-height: 1.45; }
+  .blurb strong { color: var(--text-primary); font-weight: 600; }
+  .blurb a { color: var(--text-primary); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  .blurb a:hover { text-decoration-thickness: 2px; }
+  .blurb a.btn-next { display: inline-block; margin-top: 6px; padding: 10px 18px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface-1); color: var(--text-primary); font-size: 15px; font-weight: 500; text-decoration: none; transition: background .15s, border-color .15s; }
+  .blurb a.btn-next:hover { background: var(--surface-2); border-color: var(--text-secondary); }
+  .blurb a.btn-next:focus-visible { outline: 2px solid var(--tier-high); outline-offset: 2px; }
+  .chart-h { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
+  .err { color: var(--text-secondary); padding: 40px 0; text-align: center; }
+</style>
+</head>
+<body>
+<main>
+  <div class="nav"><a href="index.html">← Kerala female LFPR</a><a class="next" href="missing-pieces.html">The missing pieces →</a></div>
+
+  <header class="hero">
+    <h1>A quirk of PLFS: Agrarian economies show high FLFPRs</h1>
+    <div class="blurb">
+      <p class="lead">Possible reason: agriculture counts as employment in the PLFS, and that single measurement choice fundamentally shapes these rankings.</p>
+      <p>In MoSPI's PLFS, <strong><a href="https://mospi.gov.in/sites/default/files/publication_reports/PLFS_10.4_1stVisit.pdf" target="_blank" rel="noopener">Activity Status Code 21</a></strong> defines an individual who <q>worked as a helper in a household enterprise (unpaid family worker)</q>. This means agrarian states rank higher by default (Nagaland, MP, Rajasthan etc.), even if women are largely engaged in subsistence &amp; unpaid employment.</p>
+      <p>Kerala's economy is driven by services: agricultural output is <a href="#state-kerala" class="row-link">9.30%</a> of the total economic output.</p>
+    </div>
+  </header>
+
+  <h2 class="chart-h">Female labour force participation by agrarian tier</h2>
+  <p class="sub">Average across states in each tier · PLFS · usual status (ps+ss) · age 15+ · per cent</p>
+
+  <div class="controls">
+    <div class="group" role="group" aria-label="Agrarian tier" id="tierGroup">
+      <span class="group-label">Agrarian tier</span>
+    </div>
+    <div class="group" role="group" aria-label="Sector" id="sectorGroup">
+      <span class="group-label">Sector</span>
+    </div>
+  </div>
+
+  <div class="card" id="card">
+    <div id="chart" class="chartwrap"><p class="err">Loading…</p></div>
+    <div class="tooltip" id="tip" role="status" aria-live="polite"></div>
+  </div>
+
+  <div class="blurb" style="margin-top: 1.5em;">
+    <p>We can see that a state’s FLFPR and share of agriculture in economic output is inversely related. This could explain a lot about why Kerala is middle in FLFPR. But there’s still missing pieces.</p>
+    <a class="btn-next" href="missing-pieces.html">Let's take a look at them →</a>
+  </div>
+
+  <details>
+    <summary>Show data table (current selection)</summary>
+    <div class="tablewrap"><table id="table"></table></div>
+  </details>
+
+  <details class="classify">
+    <summary>How states are classified, 2023-24</summary>
+    <p class="lede">Sorted by tier, then by female LFPR, highest first. Rank is the size of the state's economy by total GSVA (1 = largest of the 34).</p>
+    <div class="tablewrap"><table id="classTable"></table></div>
+    <div class="source">
+      <p><b>Sources</b></p>
+      <p>Female LFPR: Ministry of Statistics and Programme Implementation (MoSPI), Periodic Labour Force Survey (PLFS), Annual Report July 2023 – June 2024. Female, age 15+, rural + urban, usual status (ps+ss).</p>
+      <p>GSVA: MoSPI, State-wise Gross State Value Added by economic activity, 2011-12 base series, current prices, 2023-24. State estimates are compiled by the State/UT Directorates of Economics and Statistics. Recent years may be provisional and subject to revision.</p>
+      <p>Both retrieved from the MoSPI <a href="https://esankhyiki.mospi.gov.in">eSankhyiki</a> API (PLFS indicator 1; NAS indicator 29, base year 2011-12) on 26 October 2026.</p>
+      <p>Agri GSVA share, tiers and ranks are our own calculation: GSVA from “Agriculture, Livestock, Forestry and Fishing” ÷ “Total Gross State Value Added”. Tiers: High above 25%, Mid 15–25%, Low below 15%. Dadra &amp; Nagar Haveli &amp; Daman &amp; Diu and Lakshadweep have no GSVA data and are not classified.</p>
+    </div>
+  </details>
+
+  <div class="notes">
+    <p>Each line is the simple (unweighted) average of the states and UTs in that tier, so Sikkim counts as much as Uttar Pradesh. Averages are rounded to one decimal. The hover readout shows how many states each average covers. Ladakh has no data before 2019-20, and Chandigarh has no rural value for 2023-24, 2024 or 2025.</p>
+    <p>Tiers are fixed using each state's 2023-24 agriculture share of GSVA at current prices: High above 25%, Mid 15–25%, Low below 15%. States don't change tier between years. Dadra &amp; Nagar Haveli &amp; Daman &amp; Diu and Lakshadweep have no GSVA data and are left out.</p>
+    <p>July–June years and calendar years cover different periods, so the lines aren't joined across the divider. 2025 uses PLFS's new sample design and isn't directly comparable with earlier years, so the 2024→2025 segment is drawn faded.</p>
+    <p>Source: MoSPI eSankhyiki API (PLFS indicator 1; NAS indicator 29). <a href="tier_flfpr.json">State-level data (JSON)</a></p>
+  </div>
+</main>
+
+<script>
+const TIERS = [
+  { key: "High", label: "High", color: "--tier-high" },
+  { key: "Mid",  label: "Mid",  color: "--tier-mid" },
+  { key: "Low",  label: "Low",  color: "--tier-low" },
+];
+const SECTORS = [
+  { key: "rural", label: "Rural",         dash: "8 5" },
+  { key: "ru",    label: "Rural + Urban", dash: null },
+  { key: "urban", label: "Urban",         dash: "0.5 5" },
+];
+// First year collected under the January 2025 PLFS sample redesign
+const REDESIGN_YEAR = "2025";
+const SVGNS = "http://www.w3.org/2000/svg";
+
+const selected = { tier: new Set(["High", "Mid", "Low"]), sector: new Set(["ru"]) };
+let DATA = null;
+
+function el(name, attrs, parent) {
+  const e = document.createElementNS(SVGNS, name);
+  for (const k in attrs) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+
+function lineSwatch(dash, color) {
+  const s = el("svg", { width: 22, height: 8, class: "sw sw-line", "aria-hidden": "true" });
+  el("line", { x1: 2, x2: 20, y1: 4, y2: 4, stroke: color, "stroke-width": 2,
+    "stroke-linecap": "round", "stroke-dasharray": dash }, s);
+  return s;
+}
+
+// toggle chips: any combination allowed, but at least one stays on
+function buildControls() {
+  const make = (groupId, items, set, swatch) => {
+    const g = document.getElementById(groupId);
+    items.forEach(it => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.setAttribute("aria-pressed", set.has(it.key));
+      b.appendChild(swatch(it));
+      b.appendChild(document.createTextNode(it.label));
+      b.addEventListener("click", () => {
+        if (set.has(it.key)) {
+          if (set.size === 1) return;
+          set.delete(it.key);
+        } else set.add(it.key);
+        b.setAttribute("aria-pressed", set.has(it.key));
+        render();
+      });
+      g.appendChild(b);
+    });
+  };
+  make("tierGroup", TIERS, selected.tier, t => {
+    const s = document.createElement("i");
+    s.className = "sw sw-tier";
+    s.style.background = `var(${t.color})`;
+    return s;
+  });
+  make("sectorGroup", SECTORS, selected.sector, s => lineSwatch(s.dash, "var(--text-secondary)"));
+}
+
+// average of the states in a tier with a value for that year/sector
+function aggregate(tier, sector) {
+  const states = DATA.states.filter(s => s.tier === tier);
+  return DATA.years.map(y => {
+    const vals = states.map(s => (s.values[y.year] || {})[sector]).map(parseFloat).filter(Number.isFinite);
+    return vals.length ? { mean: vals.reduce((a, b) => a + b, 0) / vals.length, n: vals.length, of: states.length } : null;
+  });
+}
+
+let AGG = {};
+function precompute() {
+  TIERS.forEach(t => SECTORS.forEach(s => { AGG[`${t.key}|${s.key}`] = aggregate(t.key, s.key); }));
+}
+
+function visibleLines() {
+  const out = [];
+  TIERS.forEach(t => SECTORS.forEach(s => {
+    if (selected.tier.has(t.key) && selected.sector.has(s.key))
+      out.push({ tier: t, sector: s, pts: AGG[`${t.key}|${s.key}`] });
+  }));
+  return out;
+}
+
+const fmt = v => v.toFixed(1);
+
+function render() {
+  const years = DATA.years;
+  const lines = visibleLines();
+  const host = document.getElementById("chart");
+  host.textContent = "";
+
+  const W = 900, H = 400;
+  const m = { top: 30, right: 150, bottom: 36, left: 40 };
+  const iw = W - m.left - m.right, ih = H - m.top - m.bottom;
+
+  const gapAfter = years.findIndex((y, i) => i > 0 && y.series !== years[i - 1].series);
+  const step = iw / (years.length + (gapAfter > 0 ? 1 : 0) - 1);
+  const xs = years.map((y, i) => m.left + (i + (gapAfter > 0 && i >= gapAfter ? 1 : 0)) * step);
+
+  // y-scale from every tier/sector so the axis doesn't jump when toggling
+  const all = Object.values(AGG).flat().filter(Boolean).map(p => p.mean);
+  const yMin = Math.floor(Math.min(...all) / 5) * 5, yMax = Math.ceil(Math.max(...all) / 5) * 5;
+  const y = v => m.top + ih - (v - yMin) / (yMax - yMin) * ih;
+
+  const svg = el("svg", {
+    viewBox: `0 0 ${W} ${H}`, class: "chart", tabindex: "0", role: "img",
+    "aria-label": "Line chart of average female LFPR by agrarian tier and sector. Use left and right arrow keys to step through years."
+  }, host);
+
+  for (let v = yMin; v <= yMax; v += 5) {
+    el("line", { x1: m.left, x2: W - m.right, y1: y(v), y2: y(v),
+      stroke: v === yMin ? "var(--axis)" : "var(--grid)", "stroke-width": 1 }, svg);
+    el("text", { x: m.left - 8, y: y(v) + 4, "text-anchor": "end", class: "tick" }, svg).textContent = v;
+  }
+  years.forEach((yr, i) => {
+    el("text", { x: xs[i], y: H - m.bottom + 20, "text-anchor": "middle", class: "tick" }, svg).textContent = yr.year;
+  });
+  if (gapAfter > 0) {
+    const dx = (xs[gapAfter - 1] + xs[gapAfter]) / 2;
+    el("line", { x1: dx, x2: dx, y1: m.top - 14, y2: m.top + ih, stroke: "var(--axis)", "stroke-width": 1 }, svg);
+    el("text", { x: dx - 8, y: m.top - 6, "text-anchor": "end", class: "era" }, svg).textContent = "July–June years ←";
+    el("text", { x: dx + 8, y: m.top - 6, "text-anchor": "start", class: "era" }, svg).textContent = "→ Calendar years";
+  }
+
+  // one path per run of consecutive values within a period; the segment into
+  // the redesign year is drawn faded
+  const groups = gapAfter > 0 ? [[0, gapAfter], [gapAfter, years.length]] : [[0, years.length]];
+  lines.forEach(L => {
+    const style = { fill: "none", stroke: `var(${L.tier.color})`, "stroke-width": 2,
+      "stroke-linejoin": "round", "stroke-linecap": "round", "stroke-dasharray": L.sector.dash };
+    groups.forEach(([a, b]) => {
+      let d = "";
+      for (let i = a; i < b; i++) {
+        const p = L.pts[i];
+        if (!p) { continue; }
+        const prev = i > a ? L.pts[i - 1] : null;
+        const fade = prev && years[i].year === REDESIGN_YEAR;
+        if (fade) el("path", { ...style, d: `M${xs[i - 1]},${y(prev.mean)}L${xs[i]},${y(p.mean)}`, opacity: 0.35 }, svg);
+        d += `${!prev || fade ? "M" : "L"}${xs[i]},${y(p.mean)}`;
+      }
+      if (d) el("path", { ...style, d }, svg);
+    });
+  });
+
+  // direct end labels only when they fit without colliding
+  const last = years.length - 1;
+  const ends = lines.filter(L => L.pts[last]).map(L => ({ L, yy: y(L.pts[last].mean) })).sort((a, b) => a.yy - b.yy);
+  const fits = ends.length <= 4 && ends.every((e, i) => i === 0 || e.yy - ends[i - 1].yy >= 15);
+  ends.forEach(e => {
+    el("circle", { cx: xs[last], cy: e.yy, r: 4, fill: `var(${e.L.tier.color})`,
+      stroke: "var(--surface-1)", "stroke-width": 2 }, svg);
+    if (fits) {
+      const name = selected.sector.size > 1 ? `${e.L.tier.label} · ${e.L.sector.label}` : e.L.tier.label;
+      el("text", { x: xs[last] + 10, y: e.yy + 4, class: "endlabel" }, svg).textContent = `${fmt(e.L.pts[last].mean)} ${name}`;
+    }
+  });
+
+  // hover: crosshair snapping to the nearest year, one readout for every visible line
+  const hover = el("g", { opacity: 0 }, svg);
+  const cross = el("line", { y1: m.top, y2: m.top + ih, stroke: "var(--axis)", "stroke-width": 1 }, hover);
+  const hdots = lines.map(L => el("circle", { r: 4, fill: `var(${L.tier.color})`,
+    stroke: "var(--surface-1)", "stroke-width": 2 }, hover));
+  const tip = document.getElementById("tip");
+  const card = document.getElementById("card");
+
+  function show(i) {
+    cross.setAttribute("x1", xs[i]); cross.setAttribute("x2", xs[i]);
+    lines.forEach((L, k) => {
+      const p = L.pts[i];
+      hdots[k].setAttribute("opacity", p ? 1 : 0);
+      if (p) { hdots[k].setAttribute("cx", xs[i]); hdots[k].setAttribute("cy", y(p.mean)); }
+    });
+    hover.setAttribute("opacity", 1);
+
+    tip.textContent = "";
+    const hd = document.createElement("div");
+    hd.className = "hd";
+    const yr = years[i];
+    hd.textContent = `${yr.year} · ${yr.series === "Calendar" ? "Calendar year" : "July–June"}` +
+      (yr.year === REDESIGN_YEAR ? " · new survey design" : "");
+    tip.appendChild(hd);
+    lines.filter(L => L.pts[i]).sort((a, b) => b.pts[i].mean - a.pts[i].mean).forEach(L => {
+      const p = L.pts[i];
+      const row = document.createElement("div"); row.className = "row";
+      row.appendChild(lineSwatch(L.sector.dash, `var(${L.tier.color})`));
+      const b = document.createElement("b"); b.textContent = fmt(p.mean);
+      const lab = document.createElement("span"); lab.textContent = `${L.tier.label} · ${L.sector.label}`;
+      const n = document.createElement("span"); n.className = "n"; n.textContent = `${p.n}/${p.of} states`;
+      row.append(b, lab, n);
+      tip.appendChild(row);
+    });
+
+    const box = svg.getBoundingClientRect(), cbox = card.getBoundingClientRect();
+    const scale = box.width / W;
+    let left = box.left - cbox.left + xs[i] * scale + 14;
+    if (left + tip.offsetWidth > cbox.width - 8) left -= tip.offsetWidth + 28;
+    tip.style.left = `${Math.max(8, left)}px`;
+    tip.style.top = `${box.top - cbox.top + m.top * scale}px`;
+    tip.style.opacity = 1;
+  }
+  function hide() { hover.setAttribute("opacity", 0); tip.style.opacity = 0; }
+
+  let cur = -1;
+  const hit = el("rect", { x: m.left - step / 2, y: m.top, width: iw + step, height: ih, fill: "transparent" }, svg);
+  hit.addEventListener("pointermove", e => {
+    const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
+    const px = p.matrixTransform(svg.getScreenCTM().inverse()).x;
+    let best = 0;
+    xs.forEach((x, i) => { if (Math.abs(x - px) < Math.abs(xs[best] - px)) best = i; });
+    cur = best; show(best);
+  });
+  hit.addEventListener("pointerleave", hide);
+  svg.addEventListener("keydown", e => {
+    if (e.key === "ArrowRight") cur = Math.min(years.length - 1, cur + 1);
+    else if (e.key === "ArrowLeft") cur = Math.max(0, cur < 0 ? 0 : cur - 1);
+    else if (e.key === "Escape") { hide(); return; }
+    else return;
+    e.preventDefault(); show(cur);
+  });
+  svg.addEventListener("blur", hide);
+
+  renderTable(lines);
+}
+
+function renderTable(lines) {
+  const t = document.getElementById("table");
+  t.textContent = "";
+  const hr = t.createTHead().insertRow();
+  ["Year", ...lines.map(L => `${L.tier.label} · ${L.sector.label}`)].forEach(h => {
+    const th = document.createElement("th"); th.textContent = h; hr.appendChild(th);
+  });
+  const tb = t.createTBody();
+  DATA.years.forEach((yr, i) => {
+    const tr = tb.insertRow();
+    tr.insertCell().textContent = `${yr.year} (${yr.series === "Calendar" ? "Cal" : "Jul–Jun"})`;
+    lines.forEach(L => { const p = L.pts[i]; tr.insertCell().textContent = p ? `${fmt(p.mean)} (n=${p.n})` : "—"; });
+  });
+}
+
+function renderClassification() {
+  const t = document.getElementById("classTable");
+  const hr = t.createTHead().insertRow();
+  ["Rank", "State / UT", "Agrarian tier", "Agri GSVA share (%)", "Total GSVA (₹ Cr)", "FLFPR (%)"].forEach(h => {
+    const th = document.createElement("th"); th.textContent = h; hr.appendChild(th);
+  });
+  const order = { High: 0, Mid: 1, Low: 2 };
+  const rows = [...DATA.classification].sort((a, b) =>
+    order[a.tier] - order[b.tier] || parseFloat(b.flfpr_pct) - parseFloat(a.flfpr_pct));
+  const tb = t.createTBody();
+  rows.forEach((r, i) => {
+    const tr = tb.insertRow();
+    tr.id = "state-" + r.state.toLowerCase().replace(/[^a-z]+/g, "-");
+    if (i > 0 && r.tier !== rows[i - 1].tier) tr.className = "tier-start";
+    tr.insertCell().textContent = r.gsva_rank;
+    tr.insertCell().textContent = r.state;
+    const tc = tr.insertCell(); tc.className = "tiercell";
+    const sw = document.createElement("i");
+    sw.style.background = `var(${TIERS.find(x => x.key === r.tier).color})`;
+    tc.append(sw, document.createTextNode(r.tier));
+    tr.insertCell().textContent = r.agri_share_cur_pct.toFixed(2);
+    tr.insertCell().textContent = Math.round(r.total_gsva_cur_cr).toLocaleString("en-US");
+    tr.insertCell().textContent = r.flfpr_pct;
+  });
+}
+
+// Links to a classification row open the collapsed section, scroll to the row and flash it.
+function showRow(id) {
+  const tr = document.getElementById(id);
+  if (!tr) return;
+  tr.closest("details").open = true;
+  tr.scrollIntoView({ behavior: "smooth", block: "center" });
+  tr.classList.add("flash");
+  setTimeout(() => tr.classList.remove("flash"), 1800);
+}
+document.querySelectorAll("a.row-link").forEach(a => a.addEventListener("click", e => {
+  e.preventDefault();
+  const id = a.getAttribute("href").slice(1);
+  history.replaceState(null, "", "#" + id);
+  showRow(id);
+}));
+
+buildControls();
+fetch("tier_flfpr.json")
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(d => { DATA = d; precompute(); render(); renderClassification(); if (location.hash) showRow(location.hash.slice(1)); })
+  .catch(() => {
+    document.getElementById("chart").innerHTML =
+      '<p class="err">Couldn\'t load tier_flfpr.json. Serve this folder over HTTP (opening the file directly won\'t work).</p>';
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Possible Theories</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f9f9f7;
+    --surface-1: #fcfcfb;
+    --surface-2: #f0efec;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --grid: #e1e0d9;
+    --axis: #c3c2b7;
+    --border: rgba(11,11,11,0.10);
+    --border-strong: rgba(11,11,11,0.28);
+    --tier-high: #2a78d6;
+    --tier-mid: #eb6834;
+    --tier-low: #1baf7a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page: #0d0d0d;
+      --surface-1: #1a1a19;
+      --surface-2: #2c2c2a;
+      --text-primary: #f0efec;
+      --text-secondary: #c3c2b7;
+      --grid: #2c2c2a;
+      --axis: #383835;
+      --border: rgba(255,255,255,0.10);
+      --border-strong: rgba(255,255,255,0.30);
+      --tier-high: #3987e5;
+      --tier-mid: #d95926;
+      --tier-low: #199e70;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface-1: #1a1a19;
+    --surface-2: #2c2c2a;
+    --text-primary: #f0efec;
+    --text-secondary: #c3c2b7;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255,255,255,0.10);
+    --border-strong: rgba(255,255,255,0.30);
+    --tier-high: #3987e5;
+    --tier-mid: #d95926;
+    --tier-low: #199e70;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { max-width: 960px; margin: 0 auto; padding: 32px 16px 48px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+  .sub { color: var(--text-secondary); margin: 0 0 20px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 12px 28px; margin: 0 0 12px; }
+  .group { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+  .group-label { color: var(--text-secondary); font-size: 13px; margin-right: 4px; }
+  .chip {
+    font: inherit; font-size: 13px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 5px 11px; border-radius: 999px;
+    background: transparent; color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+  .chip:hover { background: var(--surface-2); }
+  .chip[aria-pressed="true"] { background: var(--surface-2); color: var(--text-primary); border-color: var(--border-strong); }
+  .chip[aria-pressed="false"] .sw { opacity: 0.3; }
+  .chip:focus-visible { outline: 2px solid var(--tier-high); outline-offset: 2px; }
+  .sw-tier { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .sw-line { display: block; }
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 16px 12px;
+    position: relative;
+  }
+  .chartwrap { overflow-x: auto; }
+  svg.chart { display: block; width: 100%; min-width: 640px; height: auto; overflow: visible; }
+  svg.chart:focus { outline: none; }
+  svg.chart:focus-visible { outline: 2px solid var(--tier-high); outline-offset: 4px; border-radius: 4px; }
+  .tick { fill: var(--text-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .era { fill: var(--text-secondary); font-size: 12px; }
+  .endlabel { fill: var(--text-primary); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .tooltip {
+    position: absolute; pointer-events: none; opacity: 0;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px; font-size: 13px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12); min-width: 190px;
+    transition: opacity .1s;
+  }
+  .tooltip .hd { color: var(--text-secondary); margin-bottom: 4px; }
+  .tooltip .row { display: flex; align-items: center; gap: 8px; }
+  .tooltip .row b { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 34px; }
+  .tooltip .row .n { color: var(--text-muted); margin-left: auto; padding-left: 10px; font-variant-numeric: tabular-nums; }
+  .tooltip .row span { color: var(--text-secondary); }
+  details { margin-top: 16px; }
+  summary { cursor: pointer; color: var(--text-secondary); }
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; margin-top: 12px; width: 100%; font-variant-numeric: tabular-nums; font-size: 14px; }
+  th, td { text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--text-secondary); font-weight: 500; }
+  .classify .lede { color: var(--text-secondary); font-size: 14px; margin: 12px 0 4px; }
+  .classify table { margin-top: 8px; }
+  .classify tr.tier-start td { border-top: 1px solid var(--axis); }
+  .classify td.tiercell { text-align: left; }
+  .classify tr.flash td { background: color-mix(in srgb, var(--tier-low) 22%, transparent); transition: background 1.2s; }
+  .classify td.tiercell i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 7px; vertical-align: -1px; }
+  .classify th:nth-child(2), .classify td:nth-child(2), .classify th:nth-child(3) { text-align: left; }
+  .source { color: var(--text-secondary); font-size: 13px; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--grid); }
+  .source p { margin: 4px 0; }
+  .source b { color: var(--text-primary); font-weight: 600; }
+  .source a { color: inherit; }
+  .notes { color: var(--text-secondary); font-size: 13px; margin-top: 20px; }
+  .notes p { margin: 4px 0; }
+  .notes a, .nav a { color: inherit; }
+  .nav { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
+  .hero { padding: 12px 0 28px; margin-bottom: 28px; border-bottom: 1px solid var(--grid); }
+  .hero h1 { font-size: clamp(26px, 4.5vw, 36px); line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 16px; max-width: 28ch; text-wrap: balance; }
+  .blurb { max-width: 68ch; color: var(--text-secondary); font-size: 16px; line-height: 1.6; }
+  .blurb p { margin: 0 0 10px; }
+  .blurb .lead { color: var(--text-primary); font-size: 18px; font-weight: 500; line-height: 1.45; }
+  .blurb strong { color: var(--text-primary); font-weight: 600; }
+  .blurb a { color: var(--text-primary); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  .blurb a:hover { text-decoration-thickness: 2px; }
+  .blurb a.btn-next { display: inline-block; margin-top: 6px; padding: 10px 18px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface-1); color: var(--text-primary); font-size: 15px; font-weight: 500; text-decoration: none; transition: background .15s, border-color .15s; }
+  .blurb a.btn-next:hover { background: var(--surface-2); border-color: var(--text-secondary); }
+  .blurb a.btn-next:focus-visible { outline: 2px solid var(--tier-high); outline-offset: 2px; }
+  .chart-h { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
+  .err { color: var(--text-secondary); padding: 40px 0; text-align: center; }
+  .stats { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0 0 10px; font-size: 13px; color: var(--text-secondary); }
+  .stats b { color: var(--text-primary); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .axis-title { fill: var(--text-secondary); font-size: 12px; }
+  .ref-label { fill: var(--text-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .ptlabel { fill: var(--text-secondary); font-size: 12px; }
+  .ptlabel.key { fill: var(--text-primary); font-weight: 600; }
+  .statbox-h { fill: var(--text-primary); font-size: 12px; font-weight: 600; }
+  .statbox-t { fill: var(--text-secondary); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .sw-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .strip-section { margin: 20px 0 40px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin: 0 0 8px; color: var(--text-secondary); font-size: 13px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .dot-state { background: var(--text-muted); opacity: 0.55; }
+  .dot-kerala { background: var(--tier-low); }
+  .tickkey { width: 2px; height: 12px; background: var(--text-primary); display: inline-block; }
+  .valuelabel { fill: var(--text-primary); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .tooltip .rank { color: var(--text-muted); }
+  .blurb ol { margin: 0 0 10px; padding-left: 1.6em; }
+  .blurb ol ol { list-style: lower-alpha; margin: 6px 0 0; }
+  .blurb li { margin: 0 0 8px; }
+  .theories { margin-bottom: 36px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="nav"><a href="missing-pieces.html">← The missing pieces</a></div>
+  <header class="hero">
+    <h1>Possible theories</h1>
+  </header>
+
+  <div class="blurb theories">
+    <p>There are 3 prevailing theories:</p>
+    <ol>
+      <li><strong>Remittances:</strong> <a href="https://spb.kerala.gov.in/sites/default/files/inline-files/FEMALE%20LABOUR.pdf" target="_blank" rel="noopener">literature</a> shows that districts with high emigrants have low FLFPRs; and districts with relatively low share in remittances income have a higher female labour force participation rate.
+        <ol>
+          <li>The most conclusive study is by Khan &amp; Valatheeswaran (2016) titled “<a href="https://sci-hub.reatk.com/10.1177/0973801015612669" target="_blank" rel="noopener"><em>International Migration, Remittances and Labour Force Participation of Left-behind Family Members: A study of Kerala</em></a>”. This study found that left-behind members reduce their labour supply in response to an international migrant member in the household. The effect of international migration varies in magnitude among male and female members. The left-behind male members decrease their supply in the labour market in response to the migration of a household member by 24 per cent, while left-behind female members and left-behind wives decrease their labour force participation by 46 and 49 per cent, respectively.</li>
+          <li>However, the study is based on NSS 2011 unemployment data &amp; <a href="https://cds.edu/wp-content/uploads/2021/02/WP450.pdf" target="_blank" rel="noopener">Kerala Migration Survey 2010</a>. An update to this study is required, with the availability of PLFS 2023-24 and Kerala Migration Survey 2023 data readily available.</li>
+        </ol>
+      </li>
+      <li><strong>Marriage:</strong> A <a href="https://csesindia.org/making-sense-of-low-labour-market-participation-of-women-in-kerala/" target="_blank" rel="noopener">2021 study</a> by <a href="https://csesindia.org/" target="_blank" rel="noopener">CSES</a> shows that marriage affects women's employment due to relocation, caregiving burden and family pressures. This is a pan-India explanation, caused by the income effect of combined married households and the prevalence of women in informal, unpaid caregiving roles, as shown in MOSPI’s Time Use Survey 2024. The lack of wanting to relocate for a job is <a href="https://csesindia.org/making-sense-of-low-labour-market-participation-of-women-in-kerala/" target="_blank" rel="noopener">another factor which affects female employment</a>, though primary quantitative data on this is lacking.
+        <ol>
+          <li>However, this study is based on PLFS 2018-19 and a 2020 village level study data (I couldn’t find a link to it). Given that women’s FLFP has consistently increased since 2020-21, the changing nature of women’s employment must be re-examined.</li>
+        </ol>
+      </li>
+    </ol>
+  </div>
+
+  <section class="strip-section">
+    <h2 class="chart-h">Women doing unpaid domestic work for their household, 2024</h2>
+    <p class="sub" id="domesticSub">Share of women who did unpaid domestic work for household members on a given day · rural + urban · age 6+ · per cent. Each dot is a state or UT.</p>
+    <div class="card" id="domesticCard">
+      <div class="legend" aria-hidden="true">
+        <span><i class="dot dot-state"></i>State / UT</span>
+        <span><i class="dot dot-kerala"></i>Kerala</span>
+        <span><i class="tickkey"></i>All India</span>
+      </div>
+      <div id="domestic" class="chartwrap"><p class="err">Loading…</p></div>
+      <div class="tooltip" id="domesticTip" role="status" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="strip-section">
+    <h2 class="chart-h">Women doing unpaid caregiving for their household, 2024</h2>
+    <p class="sub" id="caregivingSub">Share of women who did unpaid caregiving for household members on a given day · rural + urban · age 6+ · per cent. Each dot is a state or UT.</p>
+    <div class="card" id="caregivingCard">
+      <div class="legend" aria-hidden="true">
+        <span><i class="dot dot-state"></i>State / UT</span>
+        <span><i class="dot dot-kerala"></i>Kerala</span>
+        <span><i class="tickkey"></i>All India</span>
+      </div>
+      <div id="caregiving" class="chartwrap"><p class="err">Loading…</p></div>
+      <div class="tooltip" id="caregivingTip" role="status" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <div class="blurb theories">
+    <ol start="3">
+      <li><strong>Choice of higher education &amp; exam preparation:</strong>
+        <ol>
+          <li>A <a href="https://spb.kerala.gov.in/sites/default/files/inline-files/FEMALE%20LABOUR.pdf" target="_blank" rel="noopener">2015-16 Kerala State Planning Board</a> study cites the effect of more women pursuing arts in higher education as a factor affecting women’s absorption into employment. However the recent 2022-23 All India Survey on Higher Education (AISHE) doesn’t have data splits between men and women pursuing arts/science at undergraduate &amp; postgraduate levels, by state, which makes it difficult to corroborate this.</li>
+          <li>There is also a prevailing theory that the affinity for preparation of government jobs for women contributes to unemployment. But the <a href="https://csesindia.org/making-sense-of-low-labour-market-participation-of-women-in-kerala/" target="_blank" rel="noopener">CSE study</a> points out that only 12 per cent of unemployed women and 8 per cent of unemployed men expressed a preference for government jobs.</li>
+        </ol>
+      </li>
+    </ol>
+  </div>
+
+  <section class="theories">
+    <h2 class="chart-h">Conclusion</h2>
+    <div class="blurb">
+      <p>Kerala presents a development paradox: despite decades of progressive social indicators, near-universal literacy, and female higher education enrolment reaching near-parity, the state continues to grapple with low female labour force participation. In recent years, post-pandemic economic restructuring, large-scale youth migration, and a rising informal caregiving burden are fundamentally reshaping the domestic sphere. The current literature lacks up-to-date empirical evidence on how these shifting realities affect the ‘missing middle’: the substantial cohort of educated, working-age women who remain outside the active labor force. Addressing this gap is necessary for a vision for the working women of Kerala.</p>
+    </div>
+  </section>
+
+  <div class="notes">
+    <p>Each figure is the percentage of women who did the activity at least once during the day, counting only the main activity of each time slot. It is a participation rate, not time spent. Ranks run from highest participation (1) to lowest across the 36 states and UTs. States with the same value share a rank.</p>
+    <p>Source: National Statistics Office (NSO), Ministry of Statistics and Programme Implementation, <a href="https://mospi.gov.in/sites/default/files/publication_reports/TUS_Report_2024_28.03.2025F.pdf" target="_blank" rel="noopener"><em>Time Use in India, 2024</em></a> (Time Use Survey, January – December 2024), March 2025. Statement 3.1, PDF pages 98–107, female, rural + urban. <a href="tus_unpaid_female.json">Data (JSON)</a></p>
+  </div>
+</main>
+
+<script>
+// Strip plots: every state's value on one line, Kerala highlighted (same form as page 1)
+(function () {
+  const NS = "http://www.w3.org/2000/svg";
+  const HIGHLIGHT = "Kerala";
+  const CHARTS = [
+    { key: "domestic", what: "unpaid domestic work" },
+    { key: "caregiving", what: "unpaid caregiving" },
+  ];
+  const mk = (name, attrs, parent) => {
+    const e = document.createElementNS(NS, name);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  };
+  const ordinal = n => n + ({ 1: "st", 2: "nd", 3: "rd" }[(n % 100 > 10 && n % 100 < 14) ? 0 : n % 10] || "th");
+
+  function draw(id, what, d) {
+    const states = d.states.map(s => ({ ...s, v: parseFloat(s.value) })).sort((a, b) => a.v - b.v);
+    const N = states.length;
+    const rank = v => 1 + states.filter(s => s.v > v).length;
+    const hl = states.find(s => s.state === HIGHLIGHT);
+
+    if (hl) document.getElementById(id + "Sub").append(` ${HIGHLIGHT} ranks ${ordinal(rank(hl.v))} of ${N}.`);
+
+    const host = document.getElementById(id);
+    host.textContent = "";
+    const W = 860, H = 112, ly = 58;
+    const m = { left: 24, right: 24 };
+    const min = states[0].v, max = states[N - 1].v;
+    const x = v => m.left + (v - min) / (max - min) * (W - m.left - m.right);
+
+    const svg = mk("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart", tabindex: "0", role: "img",
+      "aria-label": `Strip plot of the share of women doing ${what} in 2024 across ${N} states and UTs. ` +
+        (hl ? `${HIGHLIGHT} is ${hl.value}%, ranked ${rank(hl.v)} of ${N}. ` : "") +
+        "Use left and right arrow keys to step through states." }, host);
+
+    mk("line", { x1: x(min), x2: x(max), y1: ly, y2: ly, stroke: "var(--axis)", "stroke-width": 1 }, svg);
+    states.filter(s => s !== hl).forEach(s => {
+      mk("circle", { cx: x(s.v), cy: ly, r: 5, fill: "var(--text-muted)", "fill-opacity": 0.5 }, svg);
+    });
+
+    // All-India tick, labelled below when it clears the end labels
+    const ai = parseFloat(d.all_india);
+    if (Number.isFinite(ai)) {
+      mk("line", { x1: x(ai), x2: x(ai), y1: ly - 10, y2: ly + 10, stroke: "var(--text-primary)", "stroke-width": 2 }, svg);
+      if (x(ai) - x(min) > 110 && x(max) - x(ai) > 110)
+        mk("text", { x: x(ai), y: ly + 28, "text-anchor": "middle", class: "tick" }, svg).textContent = `All India ${d.all_india}%`;
+    }
+
+    // lowest and highest at the ends (ties share the label)
+    const names = v => states.filter(s => s.v === v).map(s => s.state).join(", ");
+    mk("text", { x: x(min), y: ly + 28, "text-anchor": "start", class: "tick" }, svg).textContent = `${names(min)} ${states[0].value}%`;
+    mk("text", { x: x(max), y: ly + 28, "text-anchor": "end", class: "tick" }, svg).textContent = `${names(max)} ${states[N - 1].value}%`;
+
+    if (hl) {
+      mk("circle", { cx: x(hl.v), cy: ly, r: 7, fill: "var(--tier-low)", stroke: "var(--surface-1)", "stroke-width": 2 }, svg);
+      mk("text", { x: x(hl.v), y: ly - 16, "text-anchor": "middle", class: "valuelabel" }, svg).textContent = `${hl.value}%`;
+    }
+
+    // hover / keyboard: nearest dot, ties listed together
+    const ring = mk("circle", { r: 8, fill: "none", stroke: "var(--text-primary)", "stroke-width": 1.5, opacity: 0, "pointer-events": "none" }, svg);
+    const tip = document.getElementById(id + "Tip");
+    const card = document.getElementById(id + "Card");
+
+    function show(i) {
+      const s = states[i];
+      const group = states.filter(t => t.v === s.v);
+      ring.setAttribute("cx", x(s.v)); ring.setAttribute("cy", ly); ring.setAttribute("opacity", 1);
+      tip.textContent = "";
+      const hd = document.createElement("div"); hd.className = "hd";
+      hd.textContent = group.map(t => t.state).join(", ");
+      const row = document.createElement("div"); row.className = "row";
+      const b = document.createElement("b"); b.textContent = `${s.value}%`;
+      const r = document.createElement("span"); r.className = "rank";
+      r.textContent = `${group.length > 1 ? "joint " : ""}${ordinal(rank(s.v))} of ${N}`;
+      row.append(b, r);
+      tip.append(hd, row);
+      const box = svg.getBoundingClientRect(), cbox = card.getBoundingClientRect();
+      const scale = box.width / W;
+      let left = box.left - cbox.left + x(s.v) * scale - tip.offsetWidth / 2;
+      left = Math.min(Math.max(8, left), cbox.width - tip.offsetWidth - 8);
+      tip.style.left = `${left}px`;
+      tip.style.top = `${box.top - cbox.top + (ly - 14) * scale - tip.offsetHeight - 8}px`;
+      tip.style.opacity = 1;
+    }
+    function hide() { ring.setAttribute("opacity", 0); tip.style.opacity = 0; }
+
+    let cur = hl ? states.indexOf(hl) : 0;
+    const hit = mk("rect", { x: 0, y: ly - 24, width: W, height: 48, fill: "transparent" }, svg);
+    hit.addEventListener("pointermove", e => {
+      const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
+      const px = p.matrixTransform(svg.getScreenCTM().inverse()).x;
+      let best = 0;
+      states.forEach((s, i) => { if (Math.abs(x(s.v) - px) < Math.abs(x(states[best].v) - px)) best = i; });
+      if (Math.abs(x(states[best].v) - px) > 24) return hide();
+      cur = best; show(best);
+    });
+    hit.addEventListener("pointerleave", hide);
+    svg.addEventListener("keydown", e => {
+      if (e.key === "ArrowRight") cur = Math.min(N - 1, cur + 1);
+      else if (e.key === "ArrowLeft") cur = Math.max(0, cur - 1);
+      else if (e.key === "Escape") { hide(); return; }
+      else return;
+      e.preventDefault(); show(cur);
+    });
+    svg.addEventListener("focus", () => show(cur));
+    svg.addEventListener("blur", hide);
+  }
+
+  fetch("tus_unpaid_female.json")
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(d => CHARTS.forEach(c => draw(c.key, c.what, d[c.key])))
+    .catch(() => CHARTS.forEach(c => {
+      document.getElementById(c.key).innerHTML =
+        '<p class="err">Couldn\'t load tus_unpaid_female.json. Serve this folder over HTTP (opening the file directly won\'t work).</p>';
+    }));
+})();
+</script>
+</body>
+</html>

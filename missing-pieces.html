@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Missing Pieces</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f9f9f7;
+    --surface-1: #fcfcfb;
+    --surface-2: #f0efec;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --grid: #e1e0d9;
+    --axis: #c3c2b7;
+    --border: rgba(11,11,11,0.10);
+    --border-strong: rgba(11,11,11,0.28);
+    --tier-high: #2a78d6;
+    --tier-mid: #eb6834;
+    --tier-low: #1baf7a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page: #0d0d0d;
+      --surface-1: #1a1a19;
+      --surface-2: #2c2c2a;
+      --text-primary: #f0efec;
+      --text-secondary: #c3c2b7;
+      --grid: #2c2c2a;
+      --axis: #383835;
+      --border: rgba(255,255,255,0.10);
+      --border-strong: rgba(255,255,255,0.30);
+      --tier-high: #3987e5;
+      --tier-mid: #d95926;
+      --tier-low: #199e70;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface-1: #1a1a19;
+    --surface-2: #2c2c2a;
+    --text-primary: #f0efec;
+    --text-secondary: #c3c2b7;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255,255,255,0.10);
+    --border-strong: rgba(255,255,255,0.30);
+    --tier-high: #3987e5;
+    --tier-mid: #d95926;
+    --tier-low: #199e70;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { max-width: 960px; margin: 0 auto; padding: 32px 16px 48px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+  .sub { color: var(--text-secondary); margin: 0 0 20px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 12px 28px; margin: 0 0 12px; }
+  .group { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+  .group-label { color: var(--text-secondary); font-size: 13px; margin-right: 4px; }
+  .chip {
+    font: inherit; font-size: 13px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 5px 11px; border-radius: 999px;
+    background: transparent; color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+  .chip:hover { background: var(--surface-2); }
+  .chip[aria-pressed="true"] { background: var(--surface-2); color: var(--text-primary); border-color: var(--border-strong); }
+  .chip[aria-pressed="false"] .sw { opacity: 0.3; }
+  .chip:focus-visible { outline: 2px solid var(--tier-high); outline-offset: 2px; }
+  .sw-tier { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .sw-line { display: block; }
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 16px 12px;
+    position: relative;
+  }
+  .chartwrap { overflow-x: auto; }
+  svg.chart { display: block; width: 100%; min-width: 640px; height: auto; overflow: visible; }
+  svg.chart:focus { outline: none; }
+  svg.chart:focus-visible { outline: 2px solid var(--tier-high); outline-offset: 4px; border-radius: 4px; }
+  .tick { fill: var(--text-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .era { fill: var(--text-secondary); font-size: 12px; }
+  .endlabel { fill: var(--text-primary); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .tooltip {
+    position: absolute; pointer-events: none; opacity: 0;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px; font-size: 13px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12); min-width: 190px;
+    transition: opacity .1s;
+  }
+  .tooltip .hd { color: var(--text-secondary); margin-bottom: 4px; }
+  .tooltip .row { display: flex; align-items: center; gap: 8px; }
+  .tooltip .row b { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 34px; }
+  .tooltip .row .n { color: var(--text-muted); margin-left: auto; padding-left: 10px; font-variant-numeric: tabular-nums; }
+  .tooltip .row span { color: var(--text-secondary); }
+  details { margin-top: 16px; }
+  summary { cursor: pointer; color: var(--text-secondary); }
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; margin-top: 12px; width: 100%; font-variant-numeric: tabular-nums; font-size: 14px; }
+  th, td { text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--text-secondary); font-weight: 500; }
+  .classify .lede { color: var(--text-secondary); font-size: 14px; margin: 12px 0 4px; }
+  .classify table { margin-top: 8px; }
+  .classify tr.tier-start td { border-top: 1px solid var(--axis); }
+  .classify td.tiercell { text-align: left; }
+  .classify tr.flash td { background: color-mix(in srgb, var(--tier-low) 22%, transparent); transition: background 1.2s; }
+  .classify td.tiercell i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 7px; vertical-align: -1px; }
+  .classify th:nth-child(2), .classify td:nth-child(2), .classify th:nth-child(3) { text-align: left; }
+  .source { color: var(--text-secondary); font-size: 13px; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--grid); }
+  .source p { margin: 4px 0; }
+  .source b { color: var(--text-primary); font-weight: 600; }
+  .source a { color: inherit; }
+  .notes { color: var(--text-secondary); font-size: 13px; margin-top: 20px; }
+  .notes p { margin: 4px 0; }
+  .notes a, .nav a { color: inherit; }
+  .nav { display: flex; gap: 16px; font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
+  .nav .next { margin-left: auto; }
+  .hero { padding: 12px 0 28px; margin-bottom: 28px; border-bottom: 1px solid var(--grid); }
+  .hero h1 { font-size: clamp(26px, 4.5vw, 36px); line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 16px; max-width: 28ch; text-wrap: balance; }
+  .blurb { max-width: 68ch; color: var(--text-secondary); font-size: 16px; line-height: 1.6; }
+  .blurb p { margin: 0 0 10px; }
+  .blurb .lead { color: var(--text-primary); font-size: 18px; font-weight: 500; line-height: 1.45; }
+  .blurb strong { color: var(--text-primary); font-weight: 600; }
+  .blurb a { color: var(--text-primary); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  .blurb a:hover { text-decoration-thickness: 2px; }
+  .blurb a.btn-next { display: inline-block; margin-top: 6px; padding: 10px 18px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface-1); color: var(--text-primary); font-size: 15px; font-weight: 500; text-decoration: none; transition: background .15s, border-color .15s; }
+  .blurb a.btn-next:hover { background: var(--surface-2); border-color: var(--text-secondary); }
+  .blurb a.btn-next:focus-visible { outline: 2px solid var(--tier-high); outline-offset: 2px; }
+  .chart-h { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
+  .err { color: var(--text-secondary); padding: 40px 0; text-align: center; }
+  .stats { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0 0 10px; font-size: 13px; color: var(--text-secondary); }
+  .stats b { color: var(--text-primary); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .axis-title { fill: var(--text-secondary); font-size: 12px; }
+  .ref-label { fill: var(--text-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .ptlabel { fill: var(--text-secondary); font-size: 12px; }
+  .ptlabel.key { fill: var(--text-primary); font-weight: 600; }
+  .statbox-h { fill: var(--text-primary); font-size: 12px; font-weight: 600; }
+  .statbox-t { fill: var(--text-secondary); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .sw-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+</style>
+</head>
+<body>
+<main>
+  <div class="nav"><a href="tiers.html">← Agrarian tiers</a><a class="next" href="possible-theories.html">Possible theories →</a></div>
+  <header class="hero">
+    <h1>The missing pieces</h1>
+    <div class="blurb">
+      <p class="lead">Is it education? Across states, the share of young women in higher education tells us almost nothing about how many women are in the labour force.</p>
+    </div>
+  </header>
+
+  <h2 class="chart-h">Female higher-education enrolment vs female labour force participation, 2021-22</h2>
+  <p class="sub">One dot per state / UT · coloured by agrarian tier · per cent</p>
+
+  <div class="controls">
+    <div class="group" role="group" aria-label="Agrarian tier" id="tierGroup">
+      <span class="group-label">Agrarian tier</span>
+    </div>
+  </div>
+
+  <div class="card" id="card">
+    <div class="stats" id="stats"></div>
+    <div id="chart" class="chartwrap"><p class="err">Loading…</p></div>
+    <div class="tooltip" id="tip" role="status" aria-live="polite"></div>
+  </div>
+
+  <div class="blurb" style="margin-top: 1.5em;">
+    <p>Kerala women have high college Gross Enrolment Rates (<a href="https://aishe.gov.in/document/aishe-final-report-2021-22/" target="_blank" rel="noopener">47.8%</a>). Logic suggests that rising higher education should automatically expand female labour force participation (FLFPR). So why is it low?</p>
+    <p>In India, however, this intuition breaks down entirely. Across Indian states, the statistical correlation between the College Gross Enrolment Ratio (GER) and FLFPR is effectively non-existent or slightly negative (r=-0.05) for PLFS &amp; AISHE 2021-22 data. Yes it is only one year and a longitudinal correlation is needed, but it still gives us a picture of the reality. States with low college GERs have much higher female participation than tertiary education leaders like Chandigarh and Kerala.</p>
+    <p>Development economics tries to explain this as the "Indian Education-Employment Paradox." Stephan Klasen &amp; Janneke Pieters in their landmark paper <a href="https://documents1.worldbank.org/curated/en/466621488434287942/pdf/112477-JRN-PUBLIC-WBER-2015-29-3-what-explains-the-stagnation-of-female-labor-force-participation-in-urban-india-Copy.pdf" target="_blank" rel="noopener"><em>What Explains the Stagnation of Female Labour Force Participation in Urban India?</em></a> show that education and employment have an inverse relationship to some extent.</p>
+    <p>Female labor force participation traces a distinct U-shaped curve across educational tiers: at the base, uneducated women enter the workforce out of basic survival necessity, working primarily as unpaid family farm helpers or casual manual laborers. Moving into the trough of the U, as women complete higher secondary or general undergraduate degrees (such as a BA, B.Com, or BSc), their reservation wages and social expectations rise, leading them to withdraw from manual, informal, or agricultural labor even as the economy fails to generate sufficient white-collar, non-manual jobs to absorb them. It is only along the right arm of the curve that participation ticks upward again, driven by elite graduates with specialized technical or postgraduate credentials (such as an MBBS or top-tier MBA) whose earning potential is finally high enough to offset childcare costs.</p>
+    <p>So what is causing this missing middle, the educated women in Kerala who are out of the workforce?</p>
+    <a class="btn-next" href="possible-theories.html">Possible theories →</a>
+  </div>
+
+  <details>
+    <summary>Show data table</summary>
+    <div class="tablewrap"><table id="table"></table></div>
+  </details>
+
+  <details class="classify">
+    <summary>Sources and method</summary>
+    <div class="source">
+      <p><b>Sources</b></p>
+      <p>Female GER: Ministry of Education, All India Survey on Higher Education (AISHE) 2021-22. Women enrolled in higher education as a share of the female population aged 18–23.</p>
+      <p>Female LFPR: Ministry of Statistics and Programme Implementation (MoSPI), Periodic Labour Force Survey (PLFS), July 2021 – June 2022. Female, age 15+, rural + urban, usual status (ps+ss). Retrieved from the MoSPI <a href="https://esankhyiki.mospi.gov.in">eSankhyiki</a> API (PLFS indicator 1) on 26 October 2026.</p>
+      <p>Agrarian tiers as on the <a href="tiers.html">previous page</a> (agriculture share of GSVA, 2023-24).</p>
+      <p><b>Method</b></p>
+      <p>Correlations are computed across the 36 states and UTs, one value each (All India is not included). Pearson's r measures a straight-line relationship, and Spearman's ρ compares the rank orders. p-values are two-sided. The dashed trend line is an ordinary least-squares fit of female LFPR on female GER. Computed with SciPy in <code>build_ger_data.py</code>.</p>
+    </div>
+  </details>
+
+  <div class="notes">
+    <p>Every state and UT counts equally, so Lakshadweep counts as much as Uttar Pradesh. A correlation across states also can't say anything about whether educated women, as individuals, are more or less likely to work.</p>
+    <p>GER counts students where they study, but measures them against the population of the state they study in. Education hubs like Chandigarh, Puducherry and Delhi are pushed up by students from other states. Lakshadweep (1.2%) is pushed down because most of its students go to the mainland. Leaving out Lakshadweep gives r = <span id="altR"></span>, which is still far from significant.</p>
+    <p>The two measures cover different age groups: GER covers ages 18–23, and LFPR covers every woman aged 15 and over.</p>
+    <p>Source: AISHE 2021-22; MoSPI eSankhyiki API (PLFS indicator 1). <a href="ger_flfpr.json">State-level data (JSON)</a></p>
+  </div>
+</main>
+
+<script>
+const TIERS = [
+  { key: "High", label: "High", color: "--tier-high" },
+  { key: "Mid",  label: "Mid",  color: "--tier-mid" },
+  { key: "Low",  label: "Low",  color: "--tier-low" },
+  { key: null,   label: "Not classified", color: "--text-muted" },
+];
+// states named on the chart, and which side of the dot the name sits
+const LABELS = {
+  "Kerala": "right", "Delhi": "right", "Chandigarh": "left", "Himachal Pradesh": "left",
+  "Bihar": "right", "Lakshadweep": "right", "Nagaland": "left", "Puducherry": "right", "Sikkim": "right",
+};
+const KEY_STATE = "Kerala";
+const SVGNS = "http://www.w3.org/2000/svg";
+
+const selected = new Set(TIERS.map(t => t.key));
+let DATA = null;
+
+function el(name, attrs, parent) {
+  const e = document.createElementNS(SVGNS, name);
+  for (const k in attrs) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+const tierOf = s => TIERS.find(t => t.key === (s.tier || null));
+const fmt = v => v.toFixed(1);
+const sgn = v => (v < 0 ? "−" : "") + Math.abs(v).toFixed(2);
+const pfmt = p => p < 0.001 ? "p < 0.001" : `p = ${p.toFixed(2)}`;
+
+// toggle chips: any combination allowed, but at least one stays on
+function buildControls() {
+  const g = document.getElementById("tierGroup");
+  TIERS.forEach(t => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip";
+    b.setAttribute("aria-pressed", selected.has(t.key));
+    const sw = document.createElement("i");
+    sw.className = "sw sw-dot";
+    sw.style.background = `var(${t.color})`;
+    b.append(sw, document.createTextNode(t.label));
+    b.addEventListener("click", () => {
+      if (selected.has(t.key)) {
+        if (selected.size === 1) return;
+        selected.delete(t.key);
+      } else selected.add(t.key);
+      b.setAttribute("aria-pressed", selected.has(t.key));
+      render();
+    });
+    g.appendChild(b);
+  });
+}
+
+// Pearson r and OLS fit for the current selection (the full-set figures come from SciPy in the JSON)
+function pearson(rows) {
+  const n = rows.length;
+  if (n < 3) return null;
+  const mx = rows.reduce((a, s) => a + s.ger, 0) / n, my = rows.reduce((a, s) => a + s.flfpr, 0) / n;
+  let sxy = 0, sxx = 0, syy = 0;
+  rows.forEach(s => { const dx = s.ger - mx, dy = s.flfpr - my; sxy += dx * dy; sxx += dx * dx; syy += dy * dy; });
+  const slope = sxy / sxx;
+  return { n, r: sxy / Math.sqrt(sxx * syy), slope, intercept: my - slope * mx };
+}
+
+function renderStats(sub) {
+  const c = DATA.correlation;
+  const box = document.getElementById("stats");
+  box.textContent = "";
+  const item = (label, value) => {
+    const span = document.createElement("span");
+    const b = document.createElement("b"); b.textContent = value;
+    span.append(document.createTextNode(label + " "), b);
+    box.appendChild(span);
+  };
+  item("Pearson r", `${sgn(c.pearson_r)} (${pfmt(c.pearson_p)})`);
+  item("Spearman ρ", `${sgn(c.spearman_rho)} (${pfmt(c.spearman_p)})`);
+  item("R²", c.r_squared.toFixed(3));
+  item("n", `${c.n} states & UTs`);
+  if (sub && sub.n !== c.n) item("Selected tiers: r", `${sgn(sub.r)} (n = ${sub.n})`);
+}
+
+function render() {
+  const all = DATA.states;
+  const active = all.filter(s => selected.has(s.tier || null));
+  const sub = selected.size === TIERS.length ? null : pearson(active);
+  renderStats(sub);
+
+  const host = document.getElementById("chart");
+  host.textContent = "";
+  const W = 900, H = 520;
+  const m = { top: 28, right: 24, bottom: 48, left: 52 };
+  const iw = W - m.left - m.right, ih = H - m.top - m.bottom;
+  const X0 = 0, X1 = 80, Y0 = 0, Y1 = 70;
+  const x = v => m.left + (v - X0) / (X1 - X0) * iw;
+  const y = v => m.top + ih - (v - Y0) / (Y1 - Y0) * ih;
+  const c = DATA.correlation;
+
+  const svg = el("svg", {
+    viewBox: `0 0 ${W} ${H}`, class: "chart", tabindex: "0", role: "img",
+    "aria-label": `Scatterplot of female higher-education GER against female LFPR for ${all.length} states and UTs, 2021-22. ` +
+      `Pearson r ${sgn(c.pearson_r)}, ${pfmt(c.pearson_p)}: no meaningful correlation. Use left and right arrow keys to step through states.`
+  }, host);
+
+  for (let v = Y0; v <= Y1; v += 10) {
+    el("line", { x1: m.left, x2: W - m.right, y1: y(v), y2: y(v), stroke: v === Y0 ? "var(--axis)" : "var(--grid)", "stroke-width": 1 }, svg);
+    el("text", { x: m.left - 8, y: y(v) + 4, "text-anchor": "end", class: "tick" }, svg).textContent = v;
+  }
+  for (let v = X0; v <= X1; v += 10) {
+    el("text", { x: x(v), y: m.top + ih + 18, "text-anchor": "middle", class: "tick" }, svg).textContent = v;
+  }
+  el("text", { x: m.left + iw / 2, y: H - 6, "text-anchor": "middle", class: "axis-title" }, svg)
+    .textContent = "Female GER in higher education, ages 18–23 (AISHE 2021-22) →";
+  el("text", { x: m.left - 8, y: m.top - 12, "text-anchor": "start", class: "axis-title" }, svg)
+    .textContent = "↑ Female LFPR, 15+ (PLFS 2021-22)";
+
+  // All India reference lines
+  const ind = DATA.india;
+  el("line", { x1: x(ind.ger), x2: x(ind.ger), y1: m.top, y2: m.top + ih, stroke: "var(--axis)", "stroke-dasharray": "2 4" }, svg);
+  el("line", { x1: m.left, x2: W - m.right, y1: y(ind.flfpr), y2: y(ind.flfpr), stroke: "var(--axis)", "stroke-dasharray": "2 4" }, svg);
+  el("text", { x: x(ind.ger) + 5, y: m.top + ih - 6, class: "ref-label" }, svg).textContent = `India GER ${fmt(ind.ger)}`;
+  el("text", { x: m.left + 4, y: y(ind.flfpr) + 13, class: "ref-label" }, svg).textContent = `India LFPR ${fmt(ind.flfpr)}`;
+
+  // least-squares trend line: all states, plus the selected tiers' line when filtered
+  const fitLine = (f, attrs) => el("line", { x1: x(X0), x2: x(X1), y1: y(f.intercept + f.slope * X0), y2: y(f.intercept + f.slope * X1),
+    "stroke-width": 1.5, "stroke-linecap": "round", ...attrs }, svg);
+  fitLine(c, { stroke: "var(--text-secondary)", "stroke-dasharray": "6 5" });
+  if (sub) fitLine(sub, { stroke: "var(--text-primary)", "stroke-dasharray": "1 4", "stroke-width": 2 });
+
+  // correlation readout inside the plot, top-right (an empty corner of the data)
+  const bx = x(57), by = y(69), bw = x(79.5) - bx;
+  el("rect", { x: bx, y: by, width: bw, height: sub ? 126 : 92, rx: 6, fill: "var(--surface-1)", stroke: "var(--border)" }, svg);
+  const lines = [
+    ["statbox-h", "Correlation, all states & UTs"],
+    ["statbox-t", `Pearson r = ${sgn(c.pearson_r)}  (${pfmt(c.pearson_p)})`],
+    ["statbox-t", `Spearman ρ = ${sgn(c.spearman_rho)}  (${pfmt(c.spearman_p)})`],
+    ["statbox-t", `R² = ${c.r_squared.toFixed(3)} · n = ${c.n}`],
+  ];
+  if (sub) lines.push(["statbox-t", `Selected tiers: r = ${sgn(sub.r)} (n = ${sub.n})`]);
+  lines.forEach(([cls, t], i) => { el("text", { x: bx + 10, y: by + 18 + i * 17, class: cls }, svg).textContent = t; });
+  // trend-line key, last rows of the box
+  const ky = by + 18 + lines.length * 17;
+  el("line", { x1: bx + 10, x2: bx + 34, y1: ky - 4, y2: ky - 4, stroke: "var(--text-secondary)", "stroke-dasharray": "6 5", "stroke-width": 1.5 }, svg);
+  el("text", { x: bx + 40, y: ky, class: "statbox-t" }, svg).textContent = "Linear fit (all)";
+  if (sub) {
+    el("line", { x1: bx + 10, x2: bx + 34, y1: ky + 13, y2: ky + 13, stroke: "var(--text-primary)", "stroke-dasharray": "1 4", "stroke-width": 2, "stroke-linecap": "round" }, svg);
+    el("text", { x: bx + 40, y: ky + 17, class: "statbox-t" }, svg).textContent = "Linear fit (selected)";
+  }
+
+  // dots: inactive tiers fade back, the key state is drawn last and larger
+  const order = [...all].sort((a, b) => (a.state === KEY_STATE) - (b.state === KEY_STATE));
+  const pts = order.map(s => {
+    const on = selected.has(s.tier || null);
+    const key = s.state === KEY_STATE;
+    const dot = el("circle", { cx: x(s.ger), cy: y(s.flfpr), r: key ? 7 : 5, fill: `var(${tierOf(s).color})`,
+      stroke: key ? "var(--text-primary)" : "var(--surface-1)", "stroke-width": 2, opacity: on ? 1 : 0.15 }, svg);
+    return { s, dot, on, px: x(s.ger), py: y(s.flfpr) };
+  });
+  pts.forEach(p => {
+    const side = LABELS[p.s.state];
+    if (!side || !p.on) return;
+    const key = p.s.state === KEY_STATE;
+    const off = key ? 12 : 9;
+    el("text", { x: p.px + (side === "right" ? off : -off), y: p.py + 4, "text-anchor": side === "right" ? "start" : "end",
+      class: key ? "ptlabel key" : "ptlabel" }, svg).textContent = p.s.state;
+  });
+
+  // hover: nearest active dot within reach, plus a ring on it
+  const ring = el("circle", { r: 10, fill: "none", stroke: "var(--text-primary)", "stroke-width": 1.5, opacity: 0, "pointer-events": "none" }, svg);
+  const tip = document.getElementById("tip");
+  const card = document.getElementById("card");
+  const nav = pts.filter(p => p.on).sort((a, b) => a.s.ger - b.s.ger);
+
+  function show(p) {
+    ring.setAttribute("cx", p.px); ring.setAttribute("cy", p.py); ring.setAttribute("opacity", 1);
+    tip.textContent = "";
+    const hd = document.createElement("div"); hd.className = "hd"; hd.textContent = p.s.state;
+    tip.appendChild(hd);
+    const row = (label, value, swatch) => {
+      const r = document.createElement("div"); r.className = "row";
+      const b = document.createElement("b"); b.textContent = value;
+      const sp = document.createElement("span"); sp.textContent = label;
+      if (swatch) r.appendChild(swatch);
+      r.append(b, sp);
+      tip.appendChild(r);
+    };
+    row("Female GER", fmt(p.s.ger));
+    row("Female LFPR", fmt(p.s.flfpr));
+    const t = tierOf(p.s), sw = document.createElement("i");
+    sw.className = "sw-dot"; sw.style.background = `var(${t.color})`;
+    row(p.s.tier ? "agrarian tier" : "", p.s.tier ? t.label : "Not classified", sw);
+    const box = svg.getBoundingClientRect(), cbox = card.getBoundingClientRect();
+    const scale = box.width / W;
+    let left = box.left - cbox.left + p.px * scale + 16;
+    if (left + tip.offsetWidth > cbox.width - 8) left -= tip.offsetWidth + 32;
+    tip.style.left = `${Math.max(8, left)}px`;
+    tip.style.top = `${Math.max(8, box.top - cbox.top + p.py * scale - tip.offsetHeight / 2)}px`;
+    tip.style.opacity = 1;
+  }
+  function hide() { ring.setAttribute("opacity", 0); tip.style.opacity = 0; }
+
+  let cur = -1;
+  svg.addEventListener("pointermove", e => {
+    const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+    const q = pt.matrixTransform(svg.getScreenCTM().inverse());
+    let best = null, bd = 24 * 24;
+    nav.forEach(p => { const d = (p.px - q.x) ** 2 + (p.py - q.y) ** 2; if (d < bd) { bd = d; best = p; } });
+    if (best) { cur = nav.indexOf(best); show(best); } else hide();
+  });
+  svg.addEventListener("pointerleave", hide);
+  svg.addEventListener("keydown", e => {
+    if (e.key === "ArrowRight") cur = Math.min(nav.length - 1, cur + 1);
+    else if (e.key === "ArrowLeft") cur = Math.max(0, cur < 0 ? 0 : cur - 1);
+    else if (e.key === "Escape") { hide(); return; }
+    else return;
+    e.preventDefault(); show(nav[cur]);
+  });
+  svg.addEventListener("blur", hide);
+}
+
+function renderTable() {
+  const t = document.getElementById("table");
+  const hr = t.createTHead().insertRow();
+  ["State / UT", "Agrarian tier", "Female GER (%)", "Female LFPR (%)"].forEach(h => {
+    const th = document.createElement("th"); th.textContent = h; hr.appendChild(th);
+  });
+  const tb = t.createTBody();
+  [...DATA.states].sort((a, b) => b.ger - a.ger).concat([{ ...DATA.india, tier: "—" }]).forEach(s => {
+    const tr = tb.insertRow();
+    if (s.state === "All India") tr.className = "tier-start";
+    tr.insertCell().textContent = s.state;
+    tr.insertCell().textContent = s.tier || "Not classified";
+    tr.insertCell().textContent = fmt(s.ger);
+    tr.insertCell().textContent = fmt(s.flfpr);
+  });
+}
+
+buildControls();
+fetch("ger_flfpr.json")
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(d => {
+    DATA = d;
+    const alt = d.correlation_excl_lakshadweep;
+    document.getElementById("altR").textContent = `${sgn(alt.pearson_r)} (${pfmt(alt.pearson_p)}, n = ${alt.n})`;
+    render(); renderTable();
+  })
+  .catch(() => {
+    document.getElementById("chart").innerHTML =
+      '<p class="err">Couldn\'t load ger_flfpr.json. Serve this folder over HTTP (opening the file directly won\'t work).</p>';
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kerala Female LFPR</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f9f9f7;
+    --surface-1: #fcfcfb;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --grid: #e1e0d9;
+    --axis: #c3c2b7;
+    --border: rgba(11,11,11,0.10);
+    --series-1: #2a78d6;
+    --series-2: #eb6834;
+    --series-3: #1baf7a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page: #0d0d0d;
+      --surface-1: #1a1a19;
+      --text-primary: #f0efec;
+      --text-secondary: #c3c2b7;
+      --grid: #2c2c2a;
+      --axis: #383835;
+      --border: rgba(255,255,255,0.10);
+      --series-1: #3987e5;
+      --series-2: #d95926;
+      --series-3: #199e70;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface-1: #1a1a19;
+    --text-primary: #f0efec;
+    --text-secondary: #c3c2b7;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255,255,255,0.10);
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { max-width: 920px; margin: 0 auto; padding: 32px 16px 48px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+  .sub { color: var(--text-secondary); margin: 0 0 20px; }
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 16px 12px;
+    position: relative;
+  }
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin: 0 0 8px; color: var(--text-secondary); font-size: 13px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .key { width: 16px; height: 2px; border-radius: 1px; display: inline-block; }
+  .key.dashed { background: repeating-linear-gradient(90deg, var(--text-muted) 0 4px, transparent 4px 7px); }
+  .chartwrap { overflow-x: auto; }
+  svg { display: block; width: 100%; min-width: 640px; height: auto; overflow: visible; }
+  svg:focus { outline: none; }
+  svg:focus-visible { outline: 2px solid var(--series-1); outline-offset: 4px; border-radius: 4px; }
+  .tick { fill: var(--text-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .era { fill: var(--text-secondary); font-size: 12px; }
+  .endlabel { fill: var(--text-primary); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .tooltip {
+    position: absolute; pointer-events: none; opacity: 0;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px; font-size: 13px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12); min-width: 150px;
+    transition: opacity .1s;
+  }
+  .tooltip .hd { color: var(--text-secondary); margin-bottom: 4px; }
+  .tooltip .row { display: flex; align-items: center; gap: 8px; }
+  .tooltip .row b { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 34px; }
+  .tooltip .row span:last-child { color: var(--text-secondary); }
+  details { margin-top: 20px; }
+  summary { cursor: pointer; color: var(--text-secondary); }
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; margin-top: 12px; width: 100%; font-variant-numeric: tabular-nums; font-size: 14px; }
+  th, td { text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+  th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left; }
+  th { color: var(--text-secondary); font-weight: 500; }
+  .notes { color: var(--text-secondary); font-size: 13px; margin-top: 20px; }
+  .notes p { margin: 4px 0; }
+  .err { color: var(--text-secondary); padding: 40px 0; text-align: center; }
+  .nav { display: flex; gap: 16px; font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
+  .nav .next { margin-left: auto; }
+  .nav a { color: inherit; }
+  .hero { padding: 12px 0 28px; margin-bottom: 28px; border-bottom: 1px solid var(--grid); }
+  .hero h1 { font-size: clamp(26px, 4.5vw, 36px); line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 16px; max-width: 28ch; text-wrap: balance; }
+  .blurb { max-width: 68ch; color: var(--text-secondary); font-size: 16px; line-height: 1.6; }
+  .blurb p { margin: 0 0 10px; }
+  .fnref { font-size: 0.7em; line-height: 0; margin-left: 1px; }
+  .fnref a, .footnotes a, .blurb a { color: var(--text-primary); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  .blurb a.btn-next { display: inline-block; margin-top: 6px; padding: 10px 18px; border: 1px solid var(--axis); border-radius: 8px; background: var(--surface-1); color: var(--text-primary); font-size: 15px; font-weight: 500; text-decoration: none; transition: background .15s, border-color .15s; }
+  .blurb a.btn-next:hover { background: color-mix(in srgb, var(--text-primary) 6%, var(--surface-1)); border-color: var(--text-secondary); }
+  .blurb a.btn-next:focus-visible { outline: 2px solid var(--series-1); outline-offset: 2px; }
+  .footnotes { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--grid); color: var(--text-secondary); font-size: 13px; }
+  .footnotes ol { margin: 0; padding-left: 20px; }
+  .footnotes li:target { color: var(--text-primary); }
+  .fnback { text-decoration: none; margin-left: 4px; }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .strip-section { margin: 20px 0 40px; }
+  h2 { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .dot-state { background: var(--text-muted); opacity: 0.55; }
+  .dot-kerala { background: var(--series-3); }
+  .tickkey { width: 2px; height: 12px; background: var(--text-primary); display: inline-block; }
+  .valuelabel { fill: var(--text-primary); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .tooltip .rank { color: var(--text-muted); }
+</style>
+</head>
+<body>
+<main>
+  <div class="nav"><a class="next" href="tiers.html">A quirk of PLFS →</a></div>
+
+  <header class="hero">
+    <h1>Where are Kerala’s working women?</h1>
+    <div class="blurb">
+      <p>The recent PLFS data on Female Labour Force Participation rates throws up some surprises<sup class="fnref"><a href="#fn1" id="fnref1" aria-describedby="fn-label">1</a></sup>. Kerala low in FLFP (41.2%) &amp; Delhi the lowest (13.1%)?! Anecdotal evidence would suggest otherwise for both these places. So what is going on?</p>
+    </div>
+  </header>
+
+  <section class="strip-section">
+    <h2>Women in the labour force: where Kerala stands, 2025</h2>
+    <p class="sub" id="stripSub">Female LFPR · rural + urban · age 15+ · usual status (ps+ss) · calendar year 2025. Each dot is a state or UT.</p>
+    <div class="card" id="stripCard">
+      <div class="legend" aria-hidden="true">
+        <span><i class="dot dot-state"></i>State / UT</span>
+        <span><i class="dot dot-kerala"></i>Kerala</span>
+        <span><i class="tickkey"></i>All India</span>
+      </div>
+      <div id="strip" class="chartwrap"><p class="err">Loading…</p></div>
+      <div class="tooltip" id="stripTip" role="status" aria-live="polite"></div>
+    </div>
+    <div class="notes">
+      <p>Ranks run from highest participation (1) to lowest and count only states/UTs with a 2025 figure. States with the same value share a rank. Values are shown as returned by the API.</p>
+      <p>Source: MoSPI, Periodic Labour Force Survey (PLFS), calendar year 2025, via the eSankhyiki API (indicator 1, year_type_code 2). <a href="strip_2025.json" style="color:inherit">Data (JSON)</a></p>
+    </div>
+  </section>
+
+  <h2 class="trend-h">How it has changed, 2017-18 to 2025</h2>
+  <p class="sub">PLFS · usual status (ps+ss) · age 15+ · per cent</p>
+
+  <div class="card" id="card">
+    <div class="legend" id="legend"></div>
+    <div id="chart" class="chartwrap"><p class="err">Loading…</p></div>
+    <div class="tooltip" id="tip" role="status" aria-live="polite"></div>
+  </div>
+
+  <div class="blurb" style="margin-top: 1.5em;">
+    <p>I have been studying Kerala's changing livelihoods as a <a href="https://kaustubh-misra.github.io/kerala-vision/kerala-vision/livelihoods.html" target="_blank" rel="noopener">project</a> through PLFS data, and the pandemic seems to have pushed both rural and urban women in agriculture, largely from construction, education, finance &amp; health-social work. This can be seen in the chart above as well, a steep rise in Kerala FLFPR from 2020-21 to 2021-22 which has since sustained.</p>
+    <a class="btn-next" href="tiers.html">Why does this happen? →</a>
+  </div>
+
+  <details>
+    <summary>Show data table</summary>
+    <div class="tablewrap"><table id="table"></table></div>
+  </details>
+
+  <div class="notes">
+    <p>The two series cover different reference periods. July–June years are PLFS agricultural years and calendar years run January–December, so the lines aren't joined across the divider. Over 2022–2024 the two series overlap in time.</p>
+    <p><strong>2025 isn't directly comparable with earlier years.</strong> PLFS switched to a new sample design in January 2025, and MoSPI cautions against comparing results from then on with earlier ones. The 2024→2025 change (dashed) mixes any real change with the effect of the redesign.</p>
+    <p>Source: MoSPI eSankhyiki API (PLFS, indicator 1, state_code 14). <a href="kerala_female_lfpr.csv" style="color:inherit">Download CSV</a></p>
+  </div>
+
+  <footer class="footnotes">
+    <h2 id="fn-label" class="visually-hidden">Footnotes</h2>
+    <ol>
+      <li id="fn1">I was making a data visualization for <a href="https://kaustubh-misra.github.io/kerala-vision/kerala-vision/index.html" target="_blank" rel="noopener">my Kerala project</a>. <a href="#fnref1" class="fnback" aria-label="Back to text">↩</a></li>
+    </ol>
+  </footer>
+
+</main>
+
+<script>
+const SERIES = [
+  { key: "Rural",       label: "Rural",         color: "--series-1" },
+  { key: "Urban",       label: "Urban",         color: "--series-2" },
+  { key: "Rural+Urban", label: "Rural + Urban", color: "--series-3" },
+];
+const SVGNS = "http://www.w3.org/2000/svg";
+// First year collected under the January 2025 PLFS sample redesign
+const REDESIGN_YEAR = "2025";
+
+function el(name, attrs, parent) {
+  const e = document.createElementNS(SVGNS, name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  const head = lines[0].split(",");
+  return lines.slice(1).map(l => {
+    const cells = l.split(",");
+    const row = {};
+    head.forEach((h, i) => row[h] = cells[i]);
+    return row;
+  });
+}
+
+function buildLegend() {
+  const legend = document.getElementById("legend");
+  SERIES.forEach(s => {
+    const item = document.createElement("span");
+    const key = document.createElement("i");
+    key.className = "key";
+    key.style.background = `var(${s.color})`;
+    item.appendChild(key);
+    item.appendChild(document.createTextNode(s.label));
+    legend.appendChild(item);
+  });
+  const item = document.createElement("span");
+  const key = document.createElement("i");
+  key.className = "key dashed";
+  item.appendChild(key);
+  item.appendChild(document.createTextNode("Across the 2025 survey redesign"));
+  legend.appendChild(item);
+}
+
+function buildTable(rows) {
+  const t = document.getElementById("table");
+  const hr = t.createTHead().insertRow();
+  ["Year", "Series", "Rural", "Urban", "Rural+Urban"].forEach(h => {
+    const th = document.createElement("th"); th.textContent = h; hr.appendChild(th);
+  });
+  const tb = t.createTBody();
+  rows.forEach(r => {
+    const tr = tb.insertRow();
+    [r.Year, r.Series, r.Rural, r.Urban, r["Rural+Urban"]].forEach(v => { tr.insertCell().textContent = v; });
+  });
+}
+
+function draw(rows) {
+  const host = document.getElementById("chart");
+  host.textContent = "";
+  const W = 860, H = 380;
+  const m = { top: 28, right: 130, bottom: 36, left: 40 };
+  const iw = W - m.left - m.right, ih = H - m.top - m.bottom;
+
+  // x slots: one per row, plus one extra slot of air between the two series
+  const gapAfter = rows.findIndex((r, i) => i > 0 && r.Series !== rows[i - 1].Series);
+  const slots = rows.length + (gapAfter > 0 ? 1 : 0);
+  const step = iw / (slots - 1);
+  const xs = rows.map((r, i) => m.left + (i + (gapAfter > 0 && i >= gapAfter ? 1 : 0)) * step);
+
+  const yMin = 20, yMax = 50;
+  const y = v => m.top + ih - (v - yMin) / (yMax - yMin) * ih;
+
+  const svg = el("svg", {
+    viewBox: `0 0 ${W} ${H}`, tabindex: "0", role: "img",
+    "aria-label": "Line chart of Kerala female LFPR by sector, 2017-18 to 2025. Use left and right arrow keys to step through years."
+  }, host);
+
+  // gridlines + y ticks
+  for (let v = yMin; v <= yMax; v += 5) {
+    el("line", { x1: m.left, x2: W - m.right, y1: y(v), y2: y(v),
+      stroke: v === yMin ? "var(--axis)" : "var(--grid)", "stroke-width": 1 }, svg);
+    const t = el("text", { x: m.left - 8, y: y(v) + 4, "text-anchor": "end", class: "tick" }, svg);
+    t.textContent = v;
+  }
+  // x ticks
+  rows.forEach((r, i) => {
+    const t = el("text", { x: xs[i], y: H - m.bottom + 20, "text-anchor": "middle", class: "tick" }, svg);
+    t.textContent = r.Year;
+  });
+
+  // divider between the two series
+  if (gapAfter > 0) {
+    const dx = (xs[gapAfter - 1] + xs[gapAfter]) / 2;
+    el("line", { x1: dx, x2: dx, y1: m.top - 14, y2: m.top + ih, stroke: "var(--axis)", "stroke-width": 1 }, svg);
+    const a = el("text", { x: dx - 8, y: m.top - 4, "text-anchor": "end", class: "era" }, svg);
+    a.textContent = "July–June years ←";
+    const b = el("text", { x: dx + 8, y: m.top - 4, "text-anchor": "start", class: "era" }, svg);
+    b.textContent = "→ Calendar years";
+  }
+
+  // lines, one path per (series, period) so periods aren't joined
+  const groups = gapAfter > 0 ? [[0, gapAfter], [gapAfter, rows.length]] : [[0, rows.length]];
+  // within each period, consecutive points join solid unless the second one is the
+  // first year under the redesign, in which case that segment is dashed
+  const pt = (s, i) => `${xs[i]},${y(parseFloat(rows[i][s.key]))}`;
+  SERIES.forEach(s => {
+    groups.forEach(([a, b]) => {
+      let d = "";
+      for (let i = a; i < b; i++) {
+        const breaks = i > a && rows[i].Year === REDESIGN_YEAR;
+        if (breaks) {
+          el("path", { d: `M${pt(s, i - 1)}L${pt(s, i)}`, fill: "none", stroke: `var(${s.color})`,
+            "stroke-width": 2, "stroke-dasharray": "4 4", "stroke-linecap": "round" }, svg);
+        }
+        d += `${i === a || breaks ? "M" : "L"}${pt(s, i)}`;
+      }
+      el("path", { d, fill: "none", stroke: `var(${s.color})`, "stroke-width": 2,
+        "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
+    });
+  });
+
+  // end dots + direct labels at the last point
+  const last = rows.length - 1;
+  SERIES.forEach(s => {
+    const v = rows[last][s.key];
+    el("circle", { cx: xs[last], cy: y(parseFloat(v)), r: 4, fill: `var(${s.color})`,
+      stroke: "var(--surface-1)", "stroke-width": 2 }, svg);
+    const t = el("text", { x: xs[last] + 10, y: y(parseFloat(v)) + 4, class: "endlabel" }, svg);
+    t.textContent = `${v} ${s.label}`;
+  });
+
+  // hover layer: crosshair + per-series dots, snapping to the nearest year
+  const hover = el("g", { opacity: 0 }, svg);
+  const cross = el("line", { y1: m.top, y2: m.top + ih, stroke: "var(--axis)", "stroke-width": 1 }, hover);
+  const hdots = SERIES.map(s => el("circle", { r: 4, fill: `var(${s.color})`,
+    stroke: "var(--surface-1)", "stroke-width": 2 }, hover));
+  const tip = document.getElementById("tip");
+  const card = document.getElementById("card");
+
+  function show(i) {
+    const r = rows[i];
+    cross.setAttribute("x1", xs[i]); cross.setAttribute("x2", xs[i]);
+    SERIES.forEach((s, k) => {
+      hdots[k].setAttribute("cx", xs[i]);
+      hdots[k].setAttribute("cy", y(parseFloat(r[s.key])));
+    });
+    hover.setAttribute("opacity", 1);
+
+    tip.textContent = "";
+    const hd = document.createElement("div");
+    hd.className = "hd";
+    hd.textContent = `${r.Year} · ${r.Series === "Calendar" ? "Calendar year" : "July–June"}` +
+      (r.Year === REDESIGN_YEAR ? " · new survey design" : "");
+    tip.appendChild(hd);
+    SERIES.forEach(s => {
+      const row = document.createElement("div"); row.className = "row";
+      const key = document.createElement("i"); key.className = "key"; key.style.background = `var(${s.color})`;
+      const b = document.createElement("b"); b.textContent = r[s.key];
+      const lab = document.createElement("span"); lab.textContent = s.label;
+      row.append(key, b, lab);
+      tip.appendChild(row);
+    });
+
+    const box = svg.getBoundingClientRect(), cbox = card.getBoundingClientRect();
+    const scale = box.width / W;
+    let left = box.left - cbox.left + xs[i] * scale + 14;
+    if (left + tip.offsetWidth > cbox.width - 8) left -= tip.offsetWidth + 28;
+    tip.style.left = `${Math.max(8, left)}px`;
+    tip.style.top = `${box.top - cbox.top + m.top * scale}px`;
+    tip.style.opacity = 1;
+  }
+  function hide() { hover.setAttribute("opacity", 0); tip.style.opacity = 0; }
+
+  let cur = -1;
+  const hit = el("rect", { x: m.left - step / 2, y: m.top, width: iw + step, height: ih, fill: "transparent" }, svg);
+  hit.addEventListener("pointermove", e => {
+    const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
+    const px = p.matrixTransform(svg.getScreenCTM().inverse()).x;
+    let best = 0;
+    xs.forEach((x, i) => { if (Math.abs(x - px) < Math.abs(xs[best] - px)) best = i; });
+    cur = best; show(best);
+  });
+  hit.addEventListener("pointerleave", hide);
+  svg.addEventListener("keydown", e => {
+    if (e.key === "ArrowRight") cur = Math.min(rows.length - 1, cur + 1);
+    else if (e.key === "ArrowLeft") cur = Math.max(0, cur < 0 ? 0 : cur - 1);
+    else if (e.key === "Escape") { hide(); return; }
+    else return;
+    e.preventDefault(); show(cur);
+  });
+  svg.addEventListener("blur", hide);
+}
+
+buildLegend();
+fetch("kerala_female_lfpr.csv")
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+  .then(text => { const rows = parseCSV(text); draw(rows); buildTable(rows); })
+  .catch(() => {
+    const host = document.getElementById("chart");
+    host.innerHTML = '<p class="err">Couldn\'t load kerala_female_lfpr.csv. Serve this folder over HTTP (opening the file directly won\'t work).</p>';
+  });
+</script>
+
+<script>
+// Strip plot: every state's 2025 female LFPR on one line, Kerala highlighted
+(function () {
+  const NS = "http://www.w3.org/2000/svg";
+  const HIGHLIGHT = "Kerala";
+  const mk = (name, attrs, parent) => {
+    const e = document.createElementNS(NS, name);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  };
+  const ordinal = n => n + ({ 1: "st", 2: "nd", 3: "rd" }[(n % 100 > 10 && n % 100 < 14) ? 0 : n % 10] || "th");
+
+  function draw(d) {
+    const states = d.states.map(s => ({ ...s, v: parseFloat(s.value) })).sort((a, b) => a.v - b.v);
+    const N = states.length;
+    const rank = v => 1 + states.filter(s => s.v > v).length;
+    const hl = states.find(s => s.state === HIGHLIGHT);
+
+    if (hl) {
+      document.getElementById("stripSub").append(` ${HIGHLIGHT} ranks ${ordinal(rank(hl.v))} of ${N}.`);
+    }
+
+    const host = document.getElementById("strip");
+    host.textContent = "";
+    const W = 860, H = 112, ly = 58;
+    const m = { left: 24, right: 24 };
+    const min = states[0].v, max = states[N - 1].v;
+    const x = v => m.left + (v - min) / (max - min) * (W - m.left - m.right);
+
+    const svg = mk("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart", tabindex: "0", role: "img",
+      "aria-label": `Strip plot of female LFPR in 2025 across ${N} states and UTs. ` +
+        (hl ? `${HIGHLIGHT} is ${hl.value}%, ranked ${rank(hl.v)} of ${N}. ` : "") +
+        "Use left and right arrow keys to step through states." }, host);
+
+    mk("line", { x1: x(min), x2: x(max), y1: ly, y2: ly, stroke: "var(--axis)", "stroke-width": 1 }, svg);
+    states.filter(s => s !== hl).forEach(s => {
+      mk("circle", { cx: x(s.v), cy: ly, r: 5, fill: "var(--text-muted)", "fill-opacity": 0.5 }, svg);
+    });
+
+    // All-India tick, labelled below when it clears the end labels
+    const ai = parseFloat(d.all_india);
+    if (Number.isFinite(ai)) {
+      mk("line", { x1: x(ai), x2: x(ai), y1: ly - 10, y2: ly + 10, stroke: "var(--text-primary)", "stroke-width": 2 }, svg);
+      if (x(ai) - x(min) > 110 && x(max) - x(ai) > 110)
+        mk("text", { x: x(ai), y: ly + 28, "text-anchor": "middle", class: "tick" }, svg).textContent = `All India ${d.all_india}%`;
+    }
+
+    // lowest and highest at the ends (ties share the label)
+    const names = v => states.filter(s => s.v === v).map(s => s.state).join(", ");
+    mk("text", { x: x(min), y: ly + 28, "text-anchor": "start", class: "tick" }, svg).textContent = `${names(min)} ${states[0].value}%`;
+    mk("text", { x: x(max), y: ly + 28, "text-anchor": "end", class: "tick" }, svg).textContent = `${names(max)} ${states[N - 1].value}%`;
+
+    if (hl) {
+      mk("circle", { cx: x(hl.v), cy: ly, r: 7, fill: "var(--series-3)", stroke: "var(--surface-1)", "stroke-width": 2 }, svg);
+      mk("text", { x: x(hl.v), y: ly - 16, "text-anchor": "middle", class: "valuelabel" }, svg).textContent = `${hl.value}%`;
+    }
+
+    // hover / keyboard: nearest dot, ties listed together
+    const ring = mk("circle", { r: 8, fill: "none", stroke: "var(--text-primary)", "stroke-width": 1.5, opacity: 0, "pointer-events": "none" }, svg);
+    const tip = document.getElementById("stripTip");
+    const card = document.getElementById("stripCard");
+
+    function show(i) {
+      const s = states[i];
+      const group = states.filter(t => t.v === s.v);
+      ring.setAttribute("cx", x(s.v)); ring.setAttribute("cy", ly); ring.setAttribute("opacity", 1);
+      tip.textContent = "";
+      const hd = document.createElement("div"); hd.className = "hd";
+      hd.textContent = group.map(t => t.state).join(", ");
+      const row = document.createElement("div"); row.className = "row";
+      const b = document.createElement("b"); b.textContent = `${s.value}%`;
+      const r = document.createElement("span"); r.className = "rank";
+      r.textContent = `${group.length > 1 ? "joint " : ""}${ordinal(rank(s.v))} of ${N}`;
+      row.append(b, r);
+      tip.append(hd, row);
+      const box = svg.getBoundingClientRect(), cbox = card.getBoundingClientRect();
+      const scale = box.width / W;
+      let left = box.left - cbox.left + x(s.v) * scale - tip.offsetWidth / 2;
+      left = Math.min(Math.max(8, left), cbox.width - tip.offsetWidth - 8);
+      tip.style.left = `${left}px`;
+      tip.style.top = `${box.top - cbox.top + (ly - 14) * scale - tip.offsetHeight - 8}px`;
+      tip.style.opacity = 1;
+    }
+    function hide() { ring.setAttribute("opacity", 0); tip.style.opacity = 0; }
+
+    let cur = hl ? states.indexOf(hl) : 0;
+    const hit = mk("rect", { x: 0, y: ly - 24, width: W, height: 48, fill: "transparent" }, svg);
+    hit.addEventListener("pointermove", e => {
+      const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
+      const px = p.matrixTransform(svg.getScreenCTM().inverse()).x;
+      let best = 0;
+      states.forEach((s, i) => { if (Math.abs(x(s.v) - px) < Math.abs(x(states[best].v) - px)) best = i; });
+      if (Math.abs(x(states[best].v) - px) > 24) return hide();
+      cur = best; show(best);
+    });
+    hit.addEventListener("pointerleave", hide);
+    svg.addEventListener("keydown", e => {
+      if (e.key === "ArrowRight") cur = Math.min(N - 1, cur + 1);
+      else if (e.key === "ArrowLeft") cur = Math.max(0, cur - 1);
+      else if (e.key === "Escape") { hide(); return; }
+      else return;
+      e.preventDefault(); show(cur);
+    });
+    svg.addEventListener("focus", () => show(cur));
+    svg.addEventListener("blur", hide);
+  }
+
+  fetch("strip_2025.json")
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(draw)
+    .catch(() => {
+      document.getElementById("strip").innerHTML = '<p class="err">Couldn\'t load strip_2025.json.</p>';
+    });
+})();
+</script>
+</body>
+</html>

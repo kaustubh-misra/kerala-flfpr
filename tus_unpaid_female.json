@@ -1,0 +1,305 @@
+{
+ "source": "NSO, MoSPI, Time Use in India 2024 (Time Use Survey, January-December 2024), Statement 3.1",
+ "url": "https://mospi.gov.in/sites/default/files/publication_reports/TUS_Report_2024_28.03.2025F.pdf",
+ "measure": "Percentage of women (6+, rural + urban) who did the activity in a day, as the major activity of a time slot",
+ "domestic": {
+  "label": "Unpaid domestic services for household members",
+  "all_india": "80.9",
+  "states": [
+   {
+    "state": "Goa",
+    "value": "69.1"
+   },
+   {
+    "state": "Jammu & Kashmir",
+    "value": "76.0"
+   },
+   {
+    "state": "Bihar",
+    "value": "76.7"
+   },
+   {
+    "state": "Manipur",
+    "value": "77.4"
+   },
+   {
+    "state": "Haryana",
+    "value": "77.9"
+   },
+   {
+    "state": "Chandigarh",
+    "value": "77.9"
+   },
+   {
+    "state": "Chhattisgarh",
+    "value": "78.1"
+   },
+   {
+    "state": "Odisha",
+    "value": "78.5"
+   },
+   {
+    "state": "Andaman & Nicobar Islands",
+    "value": "78.7"
+   },
+   {
+    "state": "Delhi",
+    "value": "79.6"
+   },
+   {
+    "state": "Uttarakhand",
+    "value": "79.8"
+   },
+   {
+    "state": "Uttar Pradesh",
+    "value": "80.1"
+   },
+   {
+    "state": "Rajasthan",
+    "value": "80.2"
+   },
+   {
+    "state": "Assam",
+    "value": "80.3"
+   },
+   {
+    "state": "West Bengal",
+    "value": "80.6"
+   },
+   {
+    "state": "Jharkhand",
+    "value": "80.9"
+   },
+   {
+    "state": "Meghalaya",
+    "value": "81.1"
+   },
+   {
+    "state": "Tripura",
+    "value": "81.2"
+   },
+   {
+    "state": "Punjab",
+    "value": "81.6"
+   },
+   {
+    "state": "Tamil Nadu",
+    "value": "81.6"
+   },
+   {
+    "state": "Dadra & Nagar Haveli & Daman & Diu",
+    "value": "81.9"
+   },
+   {
+    "state": "Karnataka",
+    "value": "82.0"
+   },
+   {
+    "state": "Ladakh",
+    "value": "82.0"
+   },
+   {
+    "state": "Kerala",
+    "value": "82.1"
+   },
+   {
+    "state": "Gujarat",
+    "value": "82.8"
+   },
+   {
+    "state": "Himachal Pradesh",
+    "value": "82.8"
+   },
+   {
+    "state": "Telangana",
+    "value": "82.9"
+   },
+   {
+    "state": "Puducherry",
+    "value": "83.2"
+   },
+   {
+    "state": "Lakshadweep",
+    "value": "83.4"
+   },
+   {
+    "state": "Andhra Pradesh",
+    "value": "83.5"
+   },
+   {
+    "state": "Madhya Pradesh",
+    "value": "83.5"
+   },
+   {
+    "state": "Maharashtra",
+    "value": "83.8"
+   },
+   {
+    "state": "Nagaland",
+    "value": "84.3"
+   },
+   {
+    "state": "Mizoram",
+    "value": "88.4"
+   },
+   {
+    "state": "Sikkim",
+    "value": "88.9"
+   },
+   {
+    "state": "Arunachal Pradesh",
+    "value": "89.2"
+   }
+  ]
+ },
+ "caregiving": {
+  "label": "Unpaid caregiving services for household members",
+  "all_india": "32.0",
+  "states": [
+   {
+    "state": "Goa",
+    "value": "20.1"
+   },
+   {
+    "state": "Andaman & Nicobar Islands",
+    "value": "21.2"
+   },
+   {
+    "state": "Tamil Nadu",
+    "value": "25.4"
+   },
+   {
+    "state": "Andhra Pradesh",
+    "value": "26.4"
+   },
+   {
+    "state": "Dadra & Nagar Haveli & Daman & Diu",
+    "value": "26.6"
+   },
+   {
+    "state": "Maharashtra",
+    "value": "27.7"
+   },
+   {
+    "state": "Chhattisgarh",
+    "value": "27.9"
+   },
+   {
+    "state": "Kerala",
+    "value": "28.9"
+   },
+   {
+    "state": "Punjab",
+    "value": "29.2"
+   },
+   {
+    "state": "Gujarat",
+    "value": "29.3"
+   },
+   {
+    "state": "Puducherry",
+    "value": "29.5"
+   },
+   {
+    "state": "West Bengal",
+    "value": "30.2"
+   },
+   {
+    "state": "Himachal Pradesh",
+    "value": "30.3"
+   },
+   {
+    "state": "Odisha",
+    "value": "30.6"
+   },
+   {
+    "state": "Telangana",
+    "value": "30.9"
+   },
+   {
+    "state": "Chandigarh",
+    "value": "30.9"
+   },
+   {
+    "state": "Rajasthan",
+    "value": "31.0"
+   },
+   {
+    "state": "Tripura",
+    "value": "32.3"
+   },
+   {
+    "state": "Jammu & Kashmir",
+    "value": "32.4"
+   },
+   {
+    "state": "Karnataka",
+    "value": "33.5"
+   },
+   {
+    "state": "Haryana",
+    "value": "34.0"
+   },
+   {
+    "state": "Madhya Pradesh",
+    "value": "34.3"
+   },
+   {
+    "state": "Uttarakhand",
+    "value": "34.6"
+   },
+   {
+    "state": "Delhi",
+    "value": "34.8"
+   },
+   {
+    "state": "Jharkhand",
+    "value": "35.7"
+   },
+   {
+    "state": "Sikkim",
+    "value": "36.0"
+   },
+   {
+    "state": "Uttar Pradesh",
+    "value": "36.2"
+   },
+   {
+    "state": "Assam",
+    "value": "37.0"
+   },
+   {
+    "state": "Bihar",
+    "value": "37.0"
+   },
+   {
+    "state": "Manipur",
+    "value": "37.8"
+   },
+   {
+    "state": "Nagaland",
+    "value": "39.8"
+   },
+   {
+    "state": "Meghalaya",
+    "value": "40.0"
+   },
+   {
+    "state": "Lakshadweep",
+    "value": "46.0"
+   },
+   {
+    "state": "Mizoram",
+    "value": "48.3"
+   },
+   {
+    "state": "Ladakh",
+    "value": "51.5"
+   },
+   {
+    "state": "Arunachal Pradesh",
+    "value": "55.7"
+   }
+  ]
+ }
+}
