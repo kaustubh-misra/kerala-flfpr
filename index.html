@@ -95,6 +95,16 @@ const SERIES = [
   { key: "Rural+Urban", label: "Rural + Urban", color: "--series-3" },
 ];
 const SVGNS = "http://www.w3.org/2000/svg";
+
+// Draw at the container's real width (so text keeps its size on phones) and
+// redraw whenever that width changes, e.g. on rotation.
+function whenSized(host, draw) {
+  let w = 0;
+  new ResizeObserver(() => {
+    const nw = Math.round(host.clientWidth);
+    if (nw && nw !== w) { w = nw; draw(); }
+  }).observe(host);
+}
 // First year collected under the January 2025 PLFS sample redesign
 const REDESIGN_YEAR = "2025";
 
@@ -151,8 +161,9 @@ function buildTable(rows) {
 function draw(rows) {
   const host = document.getElementById("chart");
   host.textContent = "";
-  const W = 860, H = 380;
-  const m = { top: 28, right: 130, bottom: 36, left: 40 };
+  const W = Math.max(300, host.clientWidth), compact = W < 560;
+  const H = compact ? 300 : 380;
+  const m = { top: 28, right: compact ? 44 : 130, bottom: 36, left: 34 };
   const iw = W - m.left - m.right, ih = H - m.top - m.bottom;
 
   // x slots: one per row, plus one extra slot of air between the two series
@@ -176,20 +187,24 @@ function draw(rows) {
     const t = el("text", { x: m.left - 8, y: y(v) + 4, "text-anchor": "end", class: "tick" }, svg);
     t.textContent = v;
   }
-  // x ticks
-  rows.forEach((r, i) => {
+  // x ticks, right to left, skipping any that would crowd the one after it
+  let nextLeft = Infinity;
+  for (let i = rows.length - 1; i >= 0; i--) {
+    const half = rows[i].Year.length * 3.5;
+    if (xs[i] + half > nextLeft - 6) continue;
     const t = el("text", { x: xs[i], y: H - m.bottom + 20, "text-anchor": "middle", class: "tick" }, svg);
-    t.textContent = r.Year;
-  });
+    t.textContent = rows[i].Year;
+    nextLeft = xs[i] - half;
+  }
 
   // divider between the two series
   if (gapAfter > 0) {
     const dx = (xs[gapAfter - 1] + xs[gapAfter]) / 2;
     el("line", { x1: dx, x2: dx, y1: m.top - 14, y2: m.top + ih, stroke: "var(--axis)", "stroke-width": 1 }, svg);
     const a = el("text", { x: dx - 8, y: m.top - 4, "text-anchor": "end", class: "era" }, svg);
-    a.textContent = "July–June years ←";
+    a.textContent = compact ? "Jul–Jun ←" : "July–June years ←";
     const b = el("text", { x: dx + 8, y: m.top - 4, "text-anchor": "start", class: "era" }, svg);
-    b.textContent = "→ Calendar years";
+    b.textContent = compact ? "→ Calendar" : "→ Calendar years";
   }
 
   // lines, one path per (series, period) so periods aren't joined
@@ -220,7 +235,7 @@ function draw(rows) {
     el("circle", { cx: xs[last], cy: y(parseFloat(v)), r: 4, fill: `var(${s.color})`,
       stroke: "var(--surface-1)", "stroke-width": 2 }, svg);
     const t = el("text", { x: xs[last] + 10, y: y(parseFloat(v)) + 4, class: "endlabel" }, svg);
-    t.textContent = `${v} ${s.label}`;
+    t.textContent = compact ? v : `${v} ${s.label}`;
   });
 
   // hover layer: crosshair + per-series dots, snapping to the nearest year
@@ -267,14 +282,17 @@ function draw(rows) {
 
   let cur = -1;
   const hit = el("rect", { x: m.left - step / 2, y: m.top, width: iw + step, height: ih, fill: "transparent" }, svg);
-  hit.addEventListener("pointermove", e => {
+  const pick = e => {
     const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
     const px = p.matrixTransform(svg.getScreenCTM().inverse()).x;
     let best = 0;
     xs.forEach((x, i) => { if (Math.abs(x - px) < Math.abs(xs[best] - px)) best = i; });
     cur = best; show(best);
-  });
-  hit.addEventListener("pointerleave", hide);
+  };
+  hit.addEventListener("pointermove", pick);
+  hit.addEventListener("pointerdown", pick);
+  hit.addEventListener("pointerleave", e => { if (e.pointerType !== "touch") hide(); });
+  document.addEventListener("pointerdown", e => { if (svg.isConnected && !svg.contains(e.target)) hide(); });
   svg.addEventListener("keydown", e => {
     if (e.key === "ArrowRight") cur = Math.min(rows.length - 1, cur + 1);
     else if (e.key === "ArrowLeft") cur = Math.max(0, cur < 0 ? 0 : cur - 1);
@@ -288,7 +306,7 @@ function draw(rows) {
 buildLegend();
 fetch("kerala_female_lfpr.csv")
   .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
-  .then(text => { const rows = parseCSV(text); draw(rows); buildTable(rows); })
+  .then(text => { const rows = parseCSV(text); whenSized(document.getElementById("chart"), () => draw(rows)); buildTable(rows); })
   .catch(() => {
     const host = document.getElementById("chart");
     host.innerHTML = '<p class="err">Couldn\'t load kerala_female_lfpr.csv. Serve this folder over HTTP (opening the file directly won\'t work).</p>';
@@ -315,12 +333,14 @@ fetch("kerala_female_lfpr.csv")
     const hl = states.find(s => s.state === HIGHLIGHT);
 
     if (hl) {
-      document.getElementById("stripSub").append(` ${HIGHLIGHT} ranks ${ordinal(rank(hl.v))} of ${N}.`);
+      // added once; the chart itself redraws on resize
+      const subEl = document.getElementById("stripSub");
+      if (!subEl.dataset.ranked) { subEl.append(` ${HIGHLIGHT} ranks ${ordinal(rank(hl.v))} of ${N}.`); subEl.dataset.ranked = "1"; }
     }
 
     const host = document.getElementById("strip");
     host.textContent = "";
-    const W = 860, H = 112, ly = 58;
+    const W = Math.max(300, host.clientWidth), H = 112, ly = 58;
     const m = { left: 24, right: 24 };
     const min = states[0].v, max = states[N - 1].v;
     const x = v => m.left + (v - min) / (max - min) * (W - m.left - m.right);
@@ -337,16 +357,24 @@ fetch("kerala_female_lfpr.csv")
 
     // All-India tick, labelled below when it clears the end labels
     const ai = parseFloat(d.all_india);
+    let aiLabel = null;
     if (Number.isFinite(ai)) {
       mk("line", { x1: x(ai), x2: x(ai), y1: ly - 10, y2: ly + 10, stroke: "var(--india)", "stroke-width": 3 }, svg);
       if (x(ai) - x(min) > 110 && x(max) - x(ai) > 110)
-        mk("text", { x: x(ai), y: ly + 28, "text-anchor": "middle", class: "tick" }, svg).textContent = `All India ${d.all_india}%`;
+        aiLabel = mk("text", { x: x(ai), y: ly + 28, "text-anchor": "middle", class: "tick" }, svg);
+      if (aiLabel) aiLabel.textContent = `All India ${d.all_india}%`;
     }
 
     // lowest and highest at the ends (ties share the label)
     const names = v => states.filter(s => s.v === v).map(s => s.state).join(", ");
-    mk("text", { x: x(min), y: ly + 28, "text-anchor": "start", class: "tick" }, svg).textContent = `${names(min)} ${states[0].value}%`;
-    mk("text", { x: x(max), y: ly + 28, "text-anchor": "end", class: "tick" }, svg).textContent = `${names(max)} ${states[N - 1].value}%`;
+    const lo = mk("text", { x: x(min), y: ly + 28, "text-anchor": "start", class: "tick" }, svg);
+    lo.textContent = `${names(min)} ${states[0].value}%`;
+    const hi = mk("text", { x: x(max), y: ly + 28, "text-anchor": "end", class: "tick" }, svg);
+    hi.textContent = `${names(max)} ${states[N - 1].value}%`;
+    if (aiLabel) {
+      const a = aiLabel.getBBox(), l = lo.getBBox(), h = hi.getBBox();
+      if (a.x < l.x + l.width + 8 || a.x + a.width > h.x - 8) aiLabel.remove();
+    }
 
     if (hl) {
       mk("circle", { cx: x(hl.v), cy: ly, r: 7, fill: "var(--kerala)", stroke: "var(--surface-1)", "stroke-width": 2 }, svg);
@@ -383,15 +411,19 @@ fetch("kerala_female_lfpr.csv")
 
     let cur = hl ? states.indexOf(hl) : 0;
     const hit = mk("rect", { x: 0, y: ly - 24, width: W, height: 48, fill: "transparent" }, svg);
-    hit.addEventListener("pointermove", e => {
+    const pick = e => {
       const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
       const px = p.matrixTransform(svg.getScreenCTM().inverse()).x;
       let best = 0;
       states.forEach((s, i) => { if (Math.abs(x(s.v) - px) < Math.abs(x(states[best].v) - px)) best = i; });
       if (Math.abs(x(states[best].v) - px) > 24) return hide();
       cur = best; show(best);
-    });
-    hit.addEventListener("pointerleave", hide);
+    };
+    hit.addEventListener("pointermove", pick);
+    hit.addEventListener("pointerdown", pick);
+    hit.addEventListener("pointerleave", e => { if (e.pointerType !== "touch") hide(); });
+    // a tap keeps its tooltip until the next tap elsewhere
+    document.addEventListener("pointerdown", e => { if (svg.isConnected && !svg.contains(e.target)) hide(); });
     svg.addEventListener("keydown", e => {
       if (e.key === "ArrowRight") cur = Math.min(N - 1, cur + 1);
       else if (e.key === "ArrowLeft") cur = Math.max(0, cur - 1);
@@ -405,7 +437,7 @@ fetch("kerala_female_lfpr.csv")
 
   fetch("strip_2025.json")
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(draw)
+    .then(d => whenSized(document.getElementById("strip"), () => draw(d)))
     .catch(() => {
       document.getElementById("strip").innerHTML = '<p class="err">Couldn\'t load strip_2025.json.</p>';
     });

@@ -99,6 +99,16 @@ const SECTORS = [
 const REDESIGN_YEAR = "2025";
 const SVGNS = "http://www.w3.org/2000/svg";
 
+// Draw at the container's real width (so text keeps its size on phones) and
+// redraw whenever that width changes, e.g. on rotation.
+function whenSized(host, draw) {
+  let w = 0;
+  new ResizeObserver(() => {
+    const nw = Math.round(host.clientWidth);
+    if (nw && nw !== w) { w = nw; draw(); }
+  }).observe(host);
+}
+
 const selected = { tier: new Set(["High", "Mid", "Low"]), sector: new Set(["ru"]) };
 let DATA = null;
 
@@ -178,8 +188,9 @@ function render() {
   const host = document.getElementById("chart");
   host.textContent = "";
 
-  const W = 900, H = 400;
-  const m = { top: 30, right: 150, bottom: 36, left: 40 };
+  const W = Math.max(300, host.clientWidth), compact = W < 560;
+  const H = compact ? 300 : 400;
+  const m = { top: 30, right: compact ? 76 : 150, bottom: 36, left: 34 };
   const iw = W - m.left - m.right, ih = H - m.top - m.bottom;
 
   const gapAfter = years.findIndex((y, i) => i > 0 && y.series !== years[i - 1].series);
@@ -201,14 +212,19 @@ function render() {
       stroke: v === yMin ? "var(--axis)" : "var(--grid)", "stroke-width": 1 }, svg);
     el("text", { x: m.left - 8, y: y(v) + 4, "text-anchor": "end", class: "tick" }, svg).textContent = v;
   }
-  years.forEach((yr, i) => {
-    el("text", { x: xs[i], y: H - m.bottom + 20, "text-anchor": "middle", class: "tick" }, svg).textContent = yr.year;
-  });
+  // x ticks, right to left, skipping any that would crowd the one after it
+  let nextLeft = Infinity;
+  for (let i = years.length - 1; i >= 0; i--) {
+    const half = years[i].year.length * 3.5;
+    if (xs[i] + half > nextLeft - 6) continue;
+    el("text", { x: xs[i], y: H - m.bottom + 20, "text-anchor": "middle", class: "tick" }, svg).textContent = years[i].year;
+    nextLeft = xs[i] - half;
+  }
   if (gapAfter > 0) {
     const dx = (xs[gapAfter - 1] + xs[gapAfter]) / 2;
     el("line", { x1: dx, x2: dx, y1: m.top - 14, y2: m.top + ih, stroke: "var(--axis)", "stroke-width": 1 }, svg);
-    el("text", { x: dx - 8, y: m.top - 6, "text-anchor": "end", class: "era" }, svg).textContent = "July–June years ←";
-    el("text", { x: dx + 8, y: m.top - 6, "text-anchor": "start", class: "era" }, svg).textContent = "→ Calendar years";
+    el("text", { x: dx - 8, y: m.top - 6, "text-anchor": "end", class: "era" }, svg).textContent = compact ? "Jul–Jun ←" : "July–June years ←";
+    el("text", { x: dx + 8, y: m.top - 6, "text-anchor": "start", class: "era" }, svg).textContent = compact ? "→ Calendar" : "→ Calendar years";
   }
 
   // one path per run of consecutive values within a period; the segment into
@@ -234,7 +250,9 @@ function render() {
   // direct end labels only when they fit without colliding
   const last = years.length - 1;
   const ends = lines.filter(L => L.pts[last]).map(L => ({ L, yy: y(L.pts[last].mean) })).sort((a, b) => a.yy - b.yy);
-  const fits = ends.length <= 4 && ends.every((e, i) => i === 0 || e.yy - ends[i - 1].yy >= 15);
+  // on narrow screens there's only room for "47.7 High", not the sector too
+  const fits = ends.length <= 4 && (!compact || selected.sector.size === 1) &&
+    ends.every((e, i) => i === 0 || e.yy - ends[i - 1].yy >= 15);
   ends.forEach(e => {
     el("circle", { cx: xs[last], cy: e.yy, r: 4, fill: `var(${e.L.tier.color})`,
       stroke: "var(--surface-1)", "stroke-width": 2 }, svg);
@@ -291,14 +309,18 @@ function render() {
 
   let cur = -1;
   const hit = el("rect", { x: m.left - step / 2, y: m.top, width: iw + step, height: ih, fill: "transparent" }, svg);
-  hit.addEventListener("pointermove", e => {
+  const pick = e => {
     const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
     const px = p.matrixTransform(svg.getScreenCTM().inverse()).x;
     let best = 0;
     xs.forEach((x, i) => { if (Math.abs(x - px) < Math.abs(xs[best] - px)) best = i; });
     cur = best; show(best);
-  });
-  hit.addEventListener("pointerleave", hide);
+  };
+  hit.addEventListener("pointermove", pick);
+  hit.addEventListener("pointerdown", pick);
+  hit.addEventListener("pointerleave", e => { if (e.pointerType !== "touch") hide(); });
+  // a tap keeps its tooltip until the next tap elsewhere
+  document.addEventListener("pointerdown", e => { if (svg.isConnected && !svg.contains(e.target)) hide(); });
   svg.addEventListener("keydown", e => {
     if (e.key === "ArrowRight") cur = Math.min(years.length - 1, cur + 1);
     else if (e.key === "ArrowLeft") cur = Math.max(0, cur < 0 ? 0 : cur - 1);
@@ -371,7 +393,7 @@ document.querySelectorAll("a.row-link").forEach(a => a.addEventListener("click",
 buildControls();
 fetch("tier_flfpr.json")
   .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-  .then(d => { DATA = d; precompute(); render(); renderClassification(); if (location.hash) showRow(location.hash.slice(1)); })
+  .then(d => { DATA = d; precompute(); whenSized(document.getElementById("chart"), render); renderClassification(); if (location.hash) showRow(location.hash.slice(1)); })
   .catch(() => {
     document.getElementById("chart").innerHTML =
       '<p class="err">Couldn\'t load tier_flfpr.json. Serve this folder over HTTP (opening the file directly won\'t work).</p>';

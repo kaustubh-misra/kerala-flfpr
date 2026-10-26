@@ -98,7 +98,12 @@ main { max-width: calc(62rem + 6rem); padding: 3rem 3rem 4rem; position: relativ
   .kv-nav a:not(.kv-wordmark) { font-size: 16px; padding: 0.45rem 0.7rem; }
   .kv-about, .kv-watermark { display: none; }
 }
-@media (max-width: 639px) { main { padding: 2rem 16px 3rem; } }
+@media (max-width: 639px) {
+  main { padding: 2rem 16px 3rem; }
+  .card { padding: 0.9rem 0.6rem 0.6rem; }
+  .controls { gap: 10px 20px; }
+  .tooltip { max-width: calc(100% - 16px); }
+}
 
 /* Prev / next links */
 .nav { display: flex; gap: 16px; font-size: 16px; color: var(--sepia); margin-bottom: 2rem; }
@@ -156,7 +161,8 @@ h2 { font-size: 23px; font-weight: 600; line-height: 1.3; margin: 0 0 0.35rem; }
   margin-bottom: 1.4rem;
 }
 .chartwrap { overflow-x: auto; }
-svg.chart { display: block; width: 100%; min-width: 640px; height: auto; overflow: visible; }
+/* charts are drawn at the card's real width (see whenSized in each page) */
+svg.chart { display: block; width: 100%; height: auto; overflow: visible; }
 svg.chart:focus { outline: none; }
 svg.chart:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .err { color: var(--sepia); font-style: italic; padding: 40px 0; text-align: center; }

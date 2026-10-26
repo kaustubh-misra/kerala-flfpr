@@ -114,6 +114,15 @@
     if (parent) parent.appendChild(e);
     return e;
   };
+  // Draw at the container's real width (so text keeps its size on phones) and
+  // redraw whenever that width changes, e.g. on rotation.
+  function whenSized(host, draw) {
+    let w = 0;
+    new ResizeObserver(() => {
+      const nw = Math.round(host.clientWidth);
+      if (nw && nw !== w) { w = nw; draw(); }
+    }).observe(host);
+  }
   const ordinal = n => n + ({ 1: "st", 2: "nd", 3: "rd" }[(n % 100 > 10 && n % 100 < 14) ? 0 : n % 10] || "th");
 
   function draw(id, what, d) {
@@ -122,11 +131,13 @@
     const rank = v => 1 + states.filter(s => s.v > v).length;
     const hl = states.find(s => s.state === HIGHLIGHT);
 
-    if (hl) document.getElementById(id + "Sub").append(` ${HIGHLIGHT} ranks ${ordinal(rank(hl.v))} of ${N}.`);
+    // added once; the chart itself redraws on resize
+    const subEl = document.getElementById(id + "Sub");
+    if (hl && !subEl.dataset.ranked) { subEl.append(` ${HIGHLIGHT} ranks ${ordinal(rank(hl.v))} of ${N}.`); subEl.dataset.ranked = "1"; }
 
     const host = document.getElementById(id);
     host.textContent = "";
-    const W = 860, H = 112, ly = 58;
+    const W = Math.max(300, host.clientWidth), H = 112, ly = 58;
     const m = { left: 24, right: 24 };
     const min = states[0].v, max = states[N - 1].v;
     const x = v => m.left + (v - min) / (max - min) * (W - m.left - m.right);
@@ -143,16 +154,24 @@
 
     // All-India tick, labelled below when it clears the end labels
     const ai = parseFloat(d.all_india);
+    let aiLabel = null;
     if (Number.isFinite(ai)) {
       mk("line", { x1: x(ai), x2: x(ai), y1: ly - 10, y2: ly + 10, stroke: "var(--india)", "stroke-width": 3 }, svg);
       if (x(ai) - x(min) > 110 && x(max) - x(ai) > 110)
-        mk("text", { x: x(ai), y: ly + 28, "text-anchor": "middle", class: "tick" }, svg).textContent = `All India ${d.all_india}%`;
+        aiLabel = mk("text", { x: x(ai), y: ly + 28, "text-anchor": "middle", class: "tick" }, svg);
+      if (aiLabel) aiLabel.textContent = `All India ${d.all_india}%`;
     }
 
     // lowest and highest at the ends (ties share the label)
     const names = v => states.filter(s => s.v === v).map(s => s.state).join(", ");
-    mk("text", { x: x(min), y: ly + 28, "text-anchor": "start", class: "tick" }, svg).textContent = `${names(min)} ${states[0].value}%`;
-    mk("text", { x: x(max), y: ly + 28, "text-anchor": "end", class: "tick" }, svg).textContent = `${names(max)} ${states[N - 1].value}%`;
+    const lo = mk("text", { x: x(min), y: ly + 28, "text-anchor": "start", class: "tick" }, svg);
+    lo.textContent = `${names(min)} ${states[0].value}%`;
+    const hi = mk("text", { x: x(max), y: ly + 28, "text-anchor": "end", class: "tick" }, svg);
+    hi.textContent = `${names(max)} ${states[N - 1].value}%`;
+    if (aiLabel) {
+      const a = aiLabel.getBBox(), l = lo.getBBox(), h = hi.getBBox();
+      if (a.x < l.x + l.width + 8 || a.x + a.width > h.x - 8) aiLabel.remove();
+    }
 
     if (hl) {
       mk("circle", { cx: x(hl.v), cy: ly, r: 7, fill: "var(--kerala)", stroke: "var(--surface-1)", "stroke-width": 2 }, svg);
@@ -189,15 +208,19 @@
 
     let cur = hl ? states.indexOf(hl) : 0;
     const hit = mk("rect", { x: 0, y: ly - 24, width: W, height: 48, fill: "transparent" }, svg);
-    hit.addEventListener("pointermove", e => {
+    const pick = e => {
       const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
       const px = p.matrixTransform(svg.getScreenCTM().inverse()).x;
       let best = 0;
       states.forEach((s, i) => { if (Math.abs(x(s.v) - px) < Math.abs(x(states[best].v) - px)) best = i; });
       if (Math.abs(x(states[best].v) - px) > 24) return hide();
       cur = best; show(best);
-    });
-    hit.addEventListener("pointerleave", hide);
+    };
+    hit.addEventListener("pointermove", pick);
+    hit.addEventListener("pointerdown", pick);
+    hit.addEventListener("pointerleave", e => { if (e.pointerType !== "touch") hide(); });
+    // a tap keeps its tooltip until the next tap elsewhere
+    document.addEventListener("pointerdown", e => { if (svg.isConnected && !svg.contains(e.target)) hide(); });
     svg.addEventListener("keydown", e => {
       if (e.key === "ArrowRight") cur = Math.min(N - 1, cur + 1);
       else if (e.key === "ArrowLeft") cur = Math.max(0, cur - 1);
@@ -211,7 +234,7 @@
 
   fetch("tus_unpaid_female.json")
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(d => CHARTS.forEach(c => draw(c.key, c.what, d[c.key])))
+    .then(d => CHARTS.forEach(c => whenSized(document.getElementById(c.key), () => draw(c.key, c.what, d[c.key]))))
     .catch(() => CHARTS.forEach(c => {
       document.getElementById(c.key).innerHTML =
         '<p class="err">Couldn\'t load tus_unpaid_female.json. Serve this folder over HTTP (opening the file directly won\'t work).</p>';

@@ -96,6 +96,18 @@ const LABELS = {
 };
 const KEY_STATE = "Kerala";
 const SVGNS = "http://www.w3.org/2000/svg";
+// labels left off on narrow screens, where they'd run into Kerala's
+const WIDE_ONLY_LABELS = new Set(["Puducherry"]);
+
+// Draw at the container's real width (so text keeps its size on phones) and
+// redraw whenever that width changes, e.g. on rotation.
+function whenSized(host, draw) {
+  let w = 0;
+  new ResizeObserver(() => {
+    const nw = Math.round(host.clientWidth);
+    if (nw && nw !== w) { w = nw; draw(); }
+  }).observe(host);
+}
 
 const selected = new Set(TIERS.map(t => t.key));
 let DATA = null;
@@ -171,8 +183,9 @@ function render() {
 
   const host = document.getElementById("chart");
   host.textContent = "";
-  const W = 900, H = 520;
-  const m = { top: 28, right: 24, bottom: 48, left: 52 };
+  const W = Math.max(300, host.clientWidth), compact = W < 560;
+  const H = compact ? Math.round(W * 1.05) : 520;
+  const m = { top: 28, right: compact ? 12 : 24, bottom: compact ? 70 : 48, left: compact ? 40 : 52 };
   const iw = W - m.left - m.right, ih = H - m.top - m.bottom;
   const X0 = 0, X1 = 80, Y0 = 0, Y1 = 70;
   const x = v => m.left + (v - X0) / (X1 - X0) * iw;
@@ -189,11 +202,11 @@ function render() {
     el("line", { x1: m.left, x2: W - m.right, y1: y(v), y2: y(v), stroke: v === Y0 ? "var(--axis)" : "var(--grid)", "stroke-width": 1 }, svg);
     el("text", { x: m.left - 8, y: y(v) + 4, "text-anchor": "end", class: "tick" }, svg).textContent = v;
   }
-  for (let v = X0; v <= X1; v += 10) {
+  for (let v = X0; v <= X1; v += compact ? 20 : 10) {
     el("text", { x: x(v), y: m.top + ih + 18, "text-anchor": "middle", class: "tick" }, svg).textContent = v;
   }
-  el("text", { x: m.left + iw / 2, y: H - 6, "text-anchor": "middle", class: "axis-title" }, svg)
-    .textContent = "Female GER in higher education, ages 18–23 (AISHE 2021-22) →";
+  el("text", { x: m.left + iw / 2, y: m.top + ih + 40, "text-anchor": "middle", class: "axis-title" }, svg)
+    .textContent = compact ? "Female GER, 18–23 (AISHE 2021-22) →" : "Female GER in higher education, ages 18–23 (AISHE 2021-22) →";
   el("text", { x: m.left - 8, y: m.top - 12, "text-anchor": "start", class: "axis-title" }, svg)
     .textContent = "↑ Female LFPR, 15+ (PLFS 2021-22)";
 
@@ -210,24 +223,35 @@ function render() {
   fitLine(c, { stroke: "var(--text-secondary)", "stroke-dasharray": "6 5" });
   if (sub) fitLine(sub, { stroke: "var(--text-primary)", "stroke-dasharray": "1 4", "stroke-width": 2 });
 
-  // correlation readout inside the plot, top-right (an empty corner of the data)
-  const bx = x(57), by = y(69), bw = x(79.5) - bx;
-  el("rect", { x: bx, y: by, width: bw, height: sub ? 126 : 92, rx: 6, fill: "var(--surface-1)", stroke: "var(--border)" }, svg);
-  const lines = [
-    ["statbox-h", "Correlation, all states & UTs"],
-    ["statbox-t", `Pearson r = ${sgn(c.pearson_r)}  (${pfmt(c.pearson_p)})`],
-    ["statbox-t", `Spearman ρ = ${sgn(c.spearman_rho)}  (${pfmt(c.spearman_p)})`],
-    ["statbox-t", `R² = ${c.r_squared.toFixed(3)} · n = ${c.n}`],
-  ];
-  if (sub) lines.push(["statbox-t", `Selected tiers: r = ${sgn(sub.r)} (n = ${sub.n})`]);
-  lines.forEach(([cls, t], i) => { el("text", { x: bx + 10, y: by + 18 + i * 17, class: cls }, svg).textContent = t; });
-  // trend-line key, last rows of the box
-  const ky = by + 18 + lines.length * 17;
-  el("line", { x1: bx + 10, x2: bx + 34, y1: ky - 4, y2: ky - 4, stroke: "var(--text-secondary)", "stroke-dasharray": "6 5", "stroke-width": 1.5 }, svg);
-  el("text", { x: bx + 40, y: ky, class: "statbox-t" }, svg).textContent = "Linear fit (all)";
-  if (sub) {
-    el("line", { x1: bx + 10, x2: bx + 34, y1: ky + 13, y2: ky + 13, stroke: "var(--text-primary)", "stroke-dasharray": "1 4", "stroke-width": 2, "stroke-linecap": "round" }, svg);
-    el("text", { x: bx + 40, y: ky + 17, class: "statbox-t" }, svg).textContent = "Linear fit (selected)";
+  // correlation readout inside the plot, top-right (an empty corner of the data).
+  // Narrow screens keep only the trend-line key, under the x-axis title; the
+  // figures sit above the chart.
+  if (compact) {
+    const key = (kx, label, attrs) => {
+      el("line", { x1: kx, x2: kx + 24, y1: H - 10, y2: H - 10, "stroke-width": 1.5, ...attrs }, svg);
+      el("text", { x: kx + 30, y: H - 6, class: "statbox-t" }, svg).textContent = label;
+    };
+    key(m.left, "Linear fit (all)", { stroke: "var(--text-secondary)", "stroke-dasharray": "6 5" });
+    if (sub) key(m.left + 130, "Linear fit (selected)", { stroke: "var(--text-primary)", "stroke-dasharray": "1 4", "stroke-width": 2, "stroke-linecap": "round" });
+  } else {
+    const bx = x(57), by = y(69), bw = x(79.5) - bx;
+    el("rect", { x: bx, y: by, width: bw, height: sub ? 126 : 92, rx: 6, fill: "var(--surface-1)", stroke: "var(--border)" }, svg);
+    const lines = [
+      ["statbox-h", "Correlation, all states & UTs"],
+      ["statbox-t", `Pearson r = ${sgn(c.pearson_r)}  (${pfmt(c.pearson_p)})`],
+      ["statbox-t", `Spearman ρ = ${sgn(c.spearman_rho)}  (${pfmt(c.spearman_p)})`],
+      ["statbox-t", `R² = ${c.r_squared.toFixed(3)} · n = ${c.n}`],
+    ];
+    if (sub) lines.push(["statbox-t", `Selected tiers: r = ${sgn(sub.r)} (n = ${sub.n})`]);
+    lines.forEach(([cls, t], i) => { el("text", { x: bx + 10, y: by + 18 + i * 17, class: cls }, svg).textContent = t; });
+    // trend-line key, last rows of the box
+    const ky = by + 18 + lines.length * 17;
+    el("line", { x1: bx + 10, x2: bx + 34, y1: ky - 4, y2: ky - 4, stroke: "var(--text-secondary)", "stroke-dasharray": "6 5", "stroke-width": 1.5 }, svg);
+    el("text", { x: bx + 40, y: ky, class: "statbox-t" }, svg).textContent = "Linear fit (all)";
+    if (sub) {
+      el("line", { x1: bx + 10, x2: bx + 34, y1: ky + 13, y2: ky + 13, stroke: "var(--text-primary)", "stroke-dasharray": "1 4", "stroke-width": 2, "stroke-linecap": "round" }, svg);
+      el("text", { x: bx + 40, y: ky + 17, class: "statbox-t" }, svg).textContent = "Linear fit (selected)";
+    }
   }
 
   // dots: inactive tiers fade back, the key state is drawn last and larger
@@ -241,7 +265,7 @@ function render() {
   });
   pts.forEach(p => {
     const side = LABELS[p.s.state];
-    if (!side || !p.on) return;
+    if (!side || !p.on || (compact && WIDE_ONLY_LABELS.has(p.s.state))) return;
     const key = p.s.state === KEY_STATE;
     const off = key ? 12 : 9;
     el("text", { x: p.px + (side === "right" ? off : -off), y: p.py + 4, "text-anchor": side === "right" ? "start" : "end",
@@ -283,14 +307,18 @@ function render() {
   function hide() { ring.setAttribute("opacity", 0); tip.style.opacity = 0; }
 
   let cur = -1;
-  svg.addEventListener("pointermove", e => {
+  const pick = e => {
     const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
     const q = pt.matrixTransform(svg.getScreenCTM().inverse());
     let best = null, bd = 24 * 24;
     nav.forEach(p => { const d = (p.px - q.x) ** 2 + (p.py - q.y) ** 2; if (d < bd) { bd = d; best = p; } });
     if (best) { cur = nav.indexOf(best); show(best); } else hide();
-  });
-  svg.addEventListener("pointerleave", hide);
+  };
+  svg.addEventListener("pointermove", pick);
+  svg.addEventListener("pointerdown", pick);
+  svg.addEventListener("pointerleave", e => { if (e.pointerType !== "touch") hide(); });
+  // a tap keeps its tooltip until the next tap elsewhere
+  document.addEventListener("pointerdown", e => { if (svg.isConnected && !svg.contains(e.target)) hide(); });
   svg.addEventListener("keydown", e => {
     if (e.key === "ArrowRight") cur = Math.min(nav.length - 1, cur + 1);
     else if (e.key === "ArrowLeft") cur = Math.max(0, cur < 0 ? 0 : cur - 1);
@@ -325,7 +353,7 @@ fetch("ger_flfpr.json")
     DATA = d;
     const alt = d.correlation_excl_lakshadweep;
     document.getElementById("altR").textContent = `${sgn(alt.pearson_r)} (${pfmt(alt.pearson_p)}, n = ${alt.n})`;
-    render(); renderTable();
+    whenSized(document.getElementById("chart"), render); renderTable();
   })
   .catch(() => {
     document.getElementById("chart").innerHTML =
