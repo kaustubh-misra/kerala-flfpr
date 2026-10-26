@@ -4,131 +4,33 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kerala Female LFPR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+<link rel="stylesheet" href="theme.css">
 <style>
-  :root {
-    color-scheme: light;
-    --page: #f9f9f7;
-    --surface-1: #fcfcfb;
-    --text-primary: #0b0b0b;
-    --text-secondary: #52514e;
-    --text-muted: #898781;
-    --grid: #e1e0d9;
-    --axis: #c3c2b7;
-    --border: rgba(11,11,11,0.10);
-    --series-1: #2a78d6;
-    --series-2: #eb6834;
-    --series-3: #1baf7a;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      color-scheme: dark;
-      --page: #0d0d0d;
-      --surface-1: #1a1a19;
-      --text-primary: #f0efec;
-      --text-secondary: #c3c2b7;
-      --grid: #2c2c2a;
-      --axis: #383835;
-      --border: rgba(255,255,255,0.10);
-      --series-1: #3987e5;
-      --series-2: #d95926;
-      --series-3: #199e70;
-    }
-  }
-  :root[data-theme="dark"] {
-    color-scheme: dark;
-    --page: #0d0d0d;
-    --surface-1: #1a1a19;
-    --text-primary: #f0efec;
-    --text-secondary: #c3c2b7;
-    --grid: #2c2c2a;
-    --axis: #383835;
-    --border: rgba(255,255,255,0.10);
-    --series-1: #3987e5;
-    --series-2: #d95926;
-    --series-3: #199e70;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background: var(--page);
-    color: var(--text-primary);
-    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
-  }
-  main { max-width: 920px; margin: 0 auto; padding: 32px 16px 48px; }
-  h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
-  .sub { color: var(--text-secondary); margin: 0 0 20px; }
-  .card {
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px 16px 12px;
-    position: relative;
-  }
-  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin: 0 0 8px; color: var(--text-secondary); font-size: 13px; }
-  .legend span { display: inline-flex; align-items: center; gap: 6px; }
-  .key { width: 16px; height: 2px; border-radius: 1px; display: inline-block; }
-  .key.dashed { background: repeating-linear-gradient(90deg, var(--text-muted) 0 4px, transparent 4px 7px); }
-  .chartwrap { overflow-x: auto; }
-  svg { display: block; width: 100%; min-width: 640px; height: auto; overflow: visible; }
-  svg:focus { outline: none; }
-  svg:focus-visible { outline: 2px solid var(--series-1); outline-offset: 4px; border-radius: 4px; }
-  .tick { fill: var(--text-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
-  .era { fill: var(--text-secondary); font-size: 12px; }
-  .endlabel { fill: var(--text-primary); font-size: 12px; font-variant-numeric: tabular-nums; }
-  .tooltip {
-    position: absolute; pointer-events: none; opacity: 0;
-    background: var(--surface-1); border: 1px solid var(--border);
-    border-radius: 8px; padding: 8px 10px; font-size: 13px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.12); min-width: 150px;
-    transition: opacity .1s;
-  }
-  .tooltip .hd { color: var(--text-secondary); margin-bottom: 4px; }
-  .tooltip .row { display: flex; align-items: center; gap: 8px; }
-  .tooltip .row b { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 34px; }
-  .tooltip .row span:last-child { color: var(--text-secondary); }
-  details { margin-top: 20px; }
-  summary { cursor: pointer; color: var(--text-secondary); }
-  .tablewrap { overflow-x: auto; }
-  table { border-collapse: collapse; margin-top: 12px; width: 100%; font-variant-numeric: tabular-nums; font-size: 14px; }
-  th, td { text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
-  th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left; }
-  th { color: var(--text-secondary); font-weight: 500; }
-  .notes { color: var(--text-secondary); font-size: 13px; margin-top: 20px; }
-  .notes p { margin: 4px 0; }
-  .err { color: var(--text-secondary); padding: 40px 0; text-align: center; }
-  .nav { display: flex; gap: 16px; font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
-  .nav .next { margin-left: auto; }
-  .nav a { color: inherit; }
-  .hero { padding: 12px 0 28px; margin-bottom: 28px; border-bottom: 1px solid var(--grid); }
-  .hero h1 { font-size: clamp(26px, 4.5vw, 36px); line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 16px; max-width: 28ch; text-wrap: balance; }
-  .blurb { max-width: 68ch; color: var(--text-secondary); font-size: 16px; line-height: 1.6; }
-  .blurb p { margin: 0 0 10px; }
-  .fnref { font-size: 0.7em; line-height: 0; margin-left: 1px; }
-  .fnref a, .footnotes a, .blurb a { color: var(--text-primary); text-decoration-thickness: 1px; text-underline-offset: 3px; }
-  .blurb a.btn-next { display: inline-block; margin-top: 6px; padding: 10px 18px; border: 1px solid var(--axis); border-radius: 8px; background: var(--surface-1); color: var(--text-primary); font-size: 15px; font-weight: 500; text-decoration: none; transition: background .15s, border-color .15s; }
-  .blurb a.btn-next:hover { background: color-mix(in srgb, var(--text-primary) 6%, var(--surface-1)); border-color: var(--text-secondary); }
-  .blurb a.btn-next:focus-visible { outline: 2px solid var(--series-1); outline-offset: 2px; }
-  .footnotes { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--grid); color: var(--text-secondary); font-size: 13px; }
-  .footnotes ol { margin: 0; padding-left: 20px; }
-  .footnotes li:target { color: var(--text-primary); }
-  .fnback { text-decoration: none; margin-left: 4px; }
-  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  .strip-section { margin: 20px 0 40px; }
-  h2 { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
-  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
-  .dot-state { background: var(--text-muted); opacity: 0.55; }
-  .dot-kerala { background: var(--series-3); }
-  .tickkey { width: 2px; height: 12px; background: var(--text-primary); display: inline-block; }
-  .valuelabel { fill: var(--text-primary); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
-  .tooltip .rank { color: var(--text-muted); }
+  #table th:nth-child(2), #table td:nth-child(2) { text-align: left; }
 </style>
 </head>
 <body>
+<aside class="kv-panel">
+  <nav class="kv-nav" aria-label="Pages">
+    <a class="kv-wordmark" href="index.html">Where are Kerala’s working women?</a>
+    <a href="index.html" aria-current="page">Kerala female LFPR</a>
+    <a href="tiers.html">A quirk of PLFS</a>
+    <a href="missing-pieces.html">The missing pieces</a>
+    <a href="possible-theories.html">Possible theories</a>
+  </nav>
+  <p class="kv-about">Part of <a href="https://kaustubh-misra.github.io/kerala-vision/kerala-vision/index.html" target="_blank" rel="noopener">Project: Kerala Vision</a>.</p>
+</aside>
+<div class="kv-watermark" aria-hidden="true"></div>
 <main>
   <div class="nav"><a class="next" href="tiers.html">A quirk of PLFS →</a></div>
 
   <header class="hero">
+    <p class="eyebrow">Kerala · Women and work</p>
     <h1>Where are Kerala’s working women?</h1>
+    <div class="rule"></div>
     <div class="blurb">
       <p>The recent PLFS data on Female Labour Force Participation rates throws up some surprises<sup class="fnref"><a href="#fn1" id="fnref1" aria-describedby="fn-label">1</a></sup>. Kerala low in FLFP (41.2%) &amp; Delhi the lowest (13.1%)?! Anecdotal evidence would suggest otherwise for both these places. So what is going on?</p>
     </div>
@@ -263,7 +165,7 @@ function draw(rows) {
   const y = v => m.top + ih - (v - yMin) / (yMax - yMin) * ih;
 
   const svg = el("svg", {
-    viewBox: `0 0 ${W} ${H}`, tabindex: "0", role: "img",
+    viewBox: `0 0 ${W} ${H}`, class: "chart", tabindex: "0", role: "img",
     "aria-label": "Line chart of Kerala female LFPR by sector, 2017-18 to 2025. Use left and right arrow keys to step through years."
   }, host);
 
@@ -436,7 +338,7 @@ fetch("kerala_female_lfpr.csv")
     // All-India tick, labelled below when it clears the end labels
     const ai = parseFloat(d.all_india);
     if (Number.isFinite(ai)) {
-      mk("line", { x1: x(ai), x2: x(ai), y1: ly - 10, y2: ly + 10, stroke: "var(--text-primary)", "stroke-width": 2 }, svg);
+      mk("line", { x1: x(ai), x2: x(ai), y1: ly - 10, y2: ly + 10, stroke: "var(--india)", "stroke-width": 3 }, svg);
       if (x(ai) - x(min) > 110 && x(max) - x(ai) > 110)
         mk("text", { x: x(ai), y: ly + 28, "text-anchor": "middle", class: "tick" }, svg).textContent = `All India ${d.all_india}%`;
     }
@@ -447,7 +349,7 @@ fetch("kerala_female_lfpr.csv")
     mk("text", { x: x(max), y: ly + 28, "text-anchor": "end", class: "tick" }, svg).textContent = `${names(max)} ${states[N - 1].value}%`;
 
     if (hl) {
-      mk("circle", { cx: x(hl.v), cy: ly, r: 7, fill: "var(--series-3)", stroke: "var(--surface-1)", "stroke-width": 2 }, svg);
+      mk("circle", { cx: x(hl.v), cy: ly, r: 7, fill: "var(--kerala)", stroke: "var(--surface-1)", "stroke-width": 2 }, svg);
       mk("text", { x: x(hl.v), y: ly - 16, "text-anchor": "middle", class: "valuelabel" }, svg).textContent = `${hl.value}%`;
     }
 

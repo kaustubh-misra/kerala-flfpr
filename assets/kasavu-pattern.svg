@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="60" height="90" viewBox="0 0 60 90">
+  <!-- Kasavu-inspired woven border motif: ivory ground, deep-green pinstripes,
+       burgundy "temple" diamond lattice (kara) running down the centre. -->
+  <rect width="60" height="90" fill="#f3e9d6"/>
+
+  <!-- outer thin gold-adjacent pinstripes, mimicking the zari edge threads -->
+  <rect x="2" width="1" height="90" fill="#1f4d3a" opacity="0.6"/>
+  <rect x="57" width="1" height="90" fill="#1f4d3a" opacity="0.6"/>
+
+  <!-- deep green pinstripe pair -->
+  <rect x="9" width="2" height="90" fill="#1f4d3a"/>
+  <rect x="49" width="2" height="90" fill="#1f4d3a"/>
+
+  <!-- burgundy temple (kara) diamond lattice -->
+  <polyline points="20,0 30,15 20,30 30,45 20,60 30,75 20,90"
+            fill="none" stroke="#9c2b22" stroke-width="2.25" stroke-linejoin="round"/>
+  <polyline points="40,0 30,15 40,30 30,45 40,60 30,75 40,90"
+            fill="none" stroke="#9c2b22" stroke-width="2.25" stroke-linejoin="round"/>
+
+  <!-- small diamond accents at each lattice node -->
+  <rect x="27" y="12" width="6" height="6" fill="#9c2b22" transform="rotate(45 30 15)"/>
+  <rect x="27" y="42" width="6" height="6" fill="#9c2b22" transform="rotate(45 30 45)"/>
+  <rect x="27" y="72" width="6" height="6" fill="#9c2b22" transform="rotate(45 30 75)"/>
+
+  <!-- tiny ivory dot centred in each diamond for a woven highlight -->
+  <circle cx="30" cy="15" r="1.3" fill="#f3e9d6"/>
+  <circle cx="30" cy="45" r="1.3" fill="#f3e9d6"/>
+  <circle cx="30" cy="75" r="1.3" fill="#f3e9d6"/>
+</svg>

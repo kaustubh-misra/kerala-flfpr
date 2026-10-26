@@ -1,0 +1,253 @@
+/* Shared design for "Where are Kerala's working women?"
+   Copied from Project: Kerala Vision (kaustubh-misra.github.io/kerala-vision):
+   sidebar nav, Bebas Neue + EB Garamond type, muted Panchavarna palette
+   (ivory paper, ink, burgundy, gold) and the Kasavu border watermark. */
+
+:root {
+  color-scheme: light;
+  --paper: #f3e9d6;
+  --paper-deep: #e7d6ae;
+  --ink: #3a2016;
+  --ink-soft: #5c3a28;
+  --sepia: #8a6a3f;
+  --faint: #b9a173;
+  --burgundy: #9c2b22;
+  --gold: #b8872f;
+
+  /* roles the chart code reads */
+  --page: var(--paper);
+  --surface-1: #f7f0e2;
+  --surface-2: #ecdfc3;
+  --text-primary: var(--ink);
+  --text-secondary: var(--ink-soft);
+  --text-muted: var(--sepia);
+  --grid: #e3d5b8;
+  --axis: #c9b48c;
+  --border: rgba(58, 32, 22, 0.14);
+  --border-strong: rgba(58, 32, 22, 0.35);
+  --kerala: var(--burgundy);
+  --india: var(--gold);
+
+  /* categorical: agrarian tiers / sectors (validated on --surface-1) */
+  --tier-high: #2a69a8;
+  --tier-mid: #c2711f;
+  --tier-low: #1a9483;
+  --series-1: var(--tier-high);
+  --series-2: var(--tier-mid);
+  --series-3: var(--tier-low);
+
+  --font-display: "Bebas Neue", sans-serif;
+  --font-book: "EB Garamond", Garamond, Georgia, serif;
+  --panel-w: 16.5rem;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--page);
+  color: var(--text-primary);
+  font: 21px/1.7 var(--font-book);
+  min-height: 100vh;
+}
+a { color: inherit; }
+
+/* Sidebar */
+.kv-panel {
+  position: fixed; left: 0; top: 0; bottom: 0; z-index: 20;
+  width: var(--panel-w);
+  padding: 1.75rem 1.75rem 1.75rem 1.6rem;
+  display: flex; flex-direction: column; justify-content: space-between;
+  background: var(--paper-deep);
+  border-right: 1px solid rgba(28, 28, 28, 0.08);
+  overflow-y: auto;
+}
+.kv-nav { display: flex; flex-direction: column; gap: 0.4rem; }
+.kv-wordmark {
+  font-size: 18px; line-height: 1.35; color: var(--ink);
+  margin-bottom: 1.3rem; text-decoration: none; display: inline-block;
+}
+.kv-nav a:not(.kv-wordmark) {
+  font-size: 20px; line-height: 1.3; letter-spacing: 0.04em;
+  color: var(--sepia); text-decoration: none;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid rgba(58, 32, 22, 0.14); border-radius: 4px;
+  background: rgba(255, 255, 255, 0.18);
+  transition: color .2s, background-color .2s, border-color .2s;
+}
+.kv-nav a:not(.kv-wordmark):hover { color: var(--ink); border-color: var(--gold); background: rgba(184, 135, 47, 0.12); }
+.kv-nav a[aria-current="page"] { color: var(--paper); background: var(--burgundy); border-color: var(--burgundy); }
+.kv-about { font-size: 18px; line-height: 1.6; color: var(--ink-soft); margin-top: 3rem; }
+.kv-about a { color: var(--burgundy); }
+
+/* Kasavu woven border, pinned to the right edge */
+.kv-watermark {
+  position: fixed; top: 0; right: 0; bottom: 0; width: 2cm;
+  background: url("assets/kasavu-pattern.svg") repeat-y top right / 52px 78px;
+  opacity: 0.3; pointer-events: none; z-index: 1;
+}
+
+/* Content column */
+main { max-width: calc(62rem + 6rem); padding: 3rem 3rem 4rem; position: relative; z-index: 2; }
+@media (min-width: 900px) {
+  main { margin-left: var(--panel-w); padding-right: calc(2cm + 2rem); }
+}
+@media (max-width: 899px) {
+  .kv-panel { position: static; width: auto; border-right: none; border-bottom: 1px solid rgba(28, 28, 28, 0.08); padding: 1.4rem 1.6rem; }
+  .kv-nav { flex-direction: row; flex-wrap: wrap; }
+  .kv-wordmark { width: 100%; margin-bottom: 0.6rem; }
+  .kv-nav a:not(.kv-wordmark) { font-size: 16px; padding: 0.45rem 0.7rem; }
+  .kv-about, .kv-watermark { display: none; }
+}
+@media (max-width: 639px) { main { padding: 2rem 16px 3rem; } }
+
+/* Prev / next links */
+.nav { display: flex; gap: 16px; font-size: 16px; color: var(--sepia); margin-bottom: 2rem; }
+.nav a { color: inherit; text-underline-offset: 3px; }
+.nav a:hover { color: var(--burgundy); }
+.nav .next { margin-left: auto; }
+
+/* Hero */
+.hero { padding: 0 0 0.5rem; margin-bottom: 1.5rem; }
+.eyebrow { font-size: 13px; letter-spacing: 0.16em; color: var(--gold); text-transform: uppercase; margin: 0 0 1.25rem; }
+.hero h1 {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: clamp(2.8rem, 6vw, 5rem); line-height: 0.95; letter-spacing: 0.01em;
+  color: var(--burgundy); margin: 0 0 1.75rem; max-width: 22ch; text-wrap: balance;
+}
+.rule { width: 4rem; height: 2px; background: var(--gold); margin: 0 0 2rem; }
+
+/* Long-form text */
+.blurb { max-width: 44rem; color: var(--text-primary); font-size: 21px; line-height: 1.7; }
+.blurb p { margin: 0 0 1.4rem; }
+.blurb .lead { font-size: 23px; line-height: 1.55; color: var(--ink-soft); }
+.blurb strong { font-weight: 600; }
+.blurb a { color: var(--burgundy); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.blurb a:hover { text-decoration-thickness: 2px; }
+.blurb ol { margin: 0 0 1.4rem; padding-left: 1.6em; }
+.blurb ol ol { list-style: lower-alpha; margin: 0.6rem 0 0; }
+.blurb li { margin: 0 0 0.9rem; }
+.blurb li::marker { color: var(--ink-soft); }
+.theories { margin-bottom: 2.5rem; }
+
+/* Forward button: the sidebar's active button */
+.blurb a.btn-next {
+  display: inline-block; margin-top: 0.4rem; padding: 0.7rem 1.2rem;
+  font-size: 20px; letter-spacing: 0.04em; text-decoration: none;
+  color: var(--paper); background: var(--burgundy);
+  border: 1px solid var(--burgundy); border-radius: 4px;
+  transition: background .2s, border-color .2s;
+}
+.blurb a.btn-next:hover { background: #7f2019; border-color: #7f2019; }
+.blurb a.btn-next:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* Headings */
+h2 { font-size: 23px; font-weight: 600; line-height: 1.3; margin: 0 0 0.35rem; }
+.chart-h, .trend-h { font-size: 23px; font-weight: 600; color: var(--ink); margin: 0 0 0.35rem; }
+.section-h { font-size: 26px; font-weight: 600; color: var(--burgundy); margin: 0 0 1rem; line-height: 1.3; }
+.sub { font-size: 17px; font-style: italic; color: var(--sepia); line-height: 1.5; margin: 0 0 1.1rem; }
+.strip-section { margin: 0 0 3rem; }
+
+/* Chart cards */
+.card {
+  position: relative;
+  background: var(--surface-1);
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 1.25rem 1.25rem 0.9rem;
+  margin-bottom: 1.4rem;
+}
+.chartwrap { overflow-x: auto; }
+svg.chart { display: block; width: 100%; min-width: 640px; height: auto; overflow: visible; }
+svg.chart:focus { outline: none; }
+svg.chart:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+.err { color: var(--sepia); font-style: italic; padding: 40px 0; text-align: center; }
+
+/* Chart text */
+.tick { fill: var(--text-muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.era { fill: var(--text-secondary); font-size: 13px; }
+.endlabel { fill: var(--text-primary); font-size: 13px; font-variant-numeric: tabular-nums; }
+.valuelabel { fill: var(--text-primary); font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.axis-title { fill: var(--text-secondary); font-size: 13px; }
+.ref-label { fill: var(--text-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.ptlabel { fill: var(--text-secondary); font-size: 13px; }
+.ptlabel.key { fill: var(--burgundy); font-weight: 600; }
+.statbox-h { fill: var(--text-primary); font-size: 13px; font-weight: 600; }
+.statbox-t { fill: var(--text-secondary); font-size: 13px; font-variant-numeric: tabular-nums; }
+.stats { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0 0 10px; font-size: 15px; color: var(--text-secondary); }
+.stats b { color: var(--text-primary); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* Legends */
+.legend { display: flex; flex-wrap: wrap; gap: 0.6rem 1.1rem; margin: 0 0 8px; color: var(--ink-soft); font-size: 14px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.key { width: 16px; height: 2px; display: inline-block; }
+.key.dashed { background: repeating-linear-gradient(90deg, var(--text-muted) 0 4px, transparent 4px 7px); }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.dot-state { background: var(--text-muted); opacity: 0.5; }
+.dot-kerala { background: var(--kerala); }
+.tickkey { width: 3px; height: 13px; background: var(--india); display: inline-block; }
+.sw-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.sw-tier { width: 11px; height: 11px; border-radius: 2px; display: inline-block; }
+.sw-line { display: block; }
+
+/* Filter chips: the sidebar's buttons, small */
+.controls { display: flex; flex-wrap: wrap; gap: 12px 28px; margin: 0 0 14px; }
+.group { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.group-label { color: var(--sepia); font-size: 15px; font-style: italic; margin-right: 4px; }
+.chip {
+  font: inherit; font-size: 15px; letter-spacing: 0.02em; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 4px 11px; border-radius: 4px;
+  background: rgba(255, 255, 255, 0.18); color: var(--sepia);
+  border: 1px solid rgba(58, 32, 22, 0.14);
+  transition: color .2s, background-color .2s, border-color .2s;
+}
+.chip:hover { color: var(--ink); border-color: var(--gold); background: rgba(184, 135, 47, 0.12); }
+.chip[aria-pressed="true"] { color: var(--ink); background: var(--surface-1); border-color: var(--ink-soft); }
+.chip[aria-pressed="false"] .sw { opacity: 0.3; }
+.chip:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* Tooltips: dark ink chip, as on Kerala Vision */
+.tooltip {
+  position: absolute; z-index: 5; pointer-events: none; opacity: 0;
+  background: rgba(58, 32, 22, 0.95); color: #fdf6e8;
+  border-radius: 4px; padding: 0.4rem 0.7rem;
+  font-size: 15px; line-height: 1.4; min-width: 150px;
+  box-shadow: 0 2px 10px rgba(58, 32, 22, 0.2);
+  transition: opacity .12s;
+}
+.tooltip .hd { color: rgba(253, 246, 232, 0.75); margin-bottom: 3px; }
+.tooltip .row { display: flex; align-items: center; gap: 8px; }
+.tooltip .row b { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 34px; }
+.tooltip .row span, .tooltip .row span:last-child { color: rgba(253, 246, 232, 0.8); }
+.tooltip .row .n, .tooltip .rank { color: rgba(253, 246, 232, 0.6); margin-left: auto; padding-left: 10px; font-variant-numeric: tabular-nums; }
+
+/* Collapsible tables */
+details { margin-top: 1.25rem; }
+summary { cursor: pointer; color: var(--burgundy); font-size: 18px; }
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; margin-top: 12px; width: 100%; font-variant-numeric: tabular-nums; font-size: 16px; background: rgba(255, 255, 255, 0.4); }
+th, td { text-align: right; padding: 0.5rem 0.9rem; border-bottom: 1px solid rgba(58, 32, 22, 0.1); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { background: var(--paper-deep); color: var(--ink); font-weight: 600; font-size: 15px; letter-spacing: 0.02em; border-bottom: 2px solid var(--gold); }
+tbody tr:nth-child(even) { background: rgba(184, 135, 47, 0.07); }
+.classify .lede { color: var(--text-secondary); font-size: 16px; margin: 12px 0 4px; }
+.classify table { margin-top: 8px; }
+.classify tr.tier-start td { border-top: 1px solid var(--axis); }
+.classify td.tiercell { text-align: left; }
+.classify tr.flash td { background: color-mix(in srgb, var(--burgundy) 18%, transparent); transition: background 1.2s; }
+.classify td.tiercell i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 7px; vertical-align: -1px; }
+.classify th:nth-child(2), .classify td:nth-child(2), .classify th:nth-child(3) { text-align: left; }
+
+/* Notes, sources, footnotes */
+.notes, .source { color: var(--ink-soft); font-size: 16px; line-height: 1.6; margin-top: 1.25rem; }
+.notes p, .source p { margin: 0 0 0.5rem; }
+.notes a, .source a { color: var(--burgundy); }
+.source { padding-top: 10px; border-top: 1px solid rgba(58, 32, 22, 0.15); }
+.source b, .notes strong { color: var(--ink); font-weight: 600; }
+.fnref { font-size: 0.7em; line-height: 0; margin-left: 1px; }
+.fnref a { color: var(--burgundy); text-decoration: none; }
+.footnotes { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid rgba(58, 32, 22, 0.2); color: var(--ink-soft); font-size: 16px; }
+.footnotes ol { margin: 0; padding-left: 1.4rem; }
+.footnotes a { color: var(--burgundy); }
+.footnotes li:target { color: var(--ink); }
+.fnback { text-decoration: none; margin-left: 4px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
